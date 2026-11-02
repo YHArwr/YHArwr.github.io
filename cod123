@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MW4 迷彩任务勾选清单（含 DMZ）</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a212b; --panel2:#222c38; --line:#2c3744;
+    --txt:#e6edf3; --sub:#9fb0c0; --accent:#ff7a45; --accent2:#4ea1ff;
+    --dmz:#ffb347; --ok:#3fb950; --warn:#f0883e; --chip:#2c3744;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:14px;line-height:1.5}
+  header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#11161d,#0f1419);
+    border-bottom:1px solid var(--line);padding:14px 18px}
+  h1{font-size:18px;margin:0 0 4px}
+  .sub{color:var(--sub);font-size:12px;margin-bottom:10px}
+  .barwrap{background:var(--panel2);border:1px solid var(--line);border-radius:8px;height:22px;overflow:hidden;position:relative}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#ffa56b);transition:width .25s}
+  .barlabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+  input[type=text]{background:var(--panel);border:1px solid var(--line);color:var(--txt);
+    border-radius:6px;padding:6px 10px;min-width:200px}
+  button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px}
+  button:hover{border-color:var(--accent)}
+  .filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .filters button.active{background:var(--accent);border-color:var(--accent);color:#1a1008;font-weight:600}
+  main{padding:18px}
+  .cat{margin-bottom:26px}
+  .cat h2{font-size:16px;border-left:4px solid var(--accent);padding-left:10px;margin:0 0 12px;
+    display:flex;align-items:center;gap:10px}
+  .cat .cprog{font-size:12px;color:var(--sub);font-weight:400}
+  .weapon{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden}
+  .whead{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;
+    background:var(--panel2);border-bottom:1px solid var(--line)}
+  .whead .wname{font-size:15px;font-weight:600}
+  .whead .wlvl{font-size:11px;color:var(--sub);background:var(--chip);padding:2px 8px;border-radius:20px}
+  .whead .wprog{margin-left:auto;font-size:12px;color:var(--sub)}
+  .whead .wmini{width:120px;height:8px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+  .whead .wmini i{display:block;height:100%;background:var(--ok);width:0;transition:width .2s}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  td.ck{width:34px;text-align:center}
+  td.ck input{width:18px;height:18px;cursor:pointer;accent-color:var(--ok)}
+  .camo{font-weight:600}
+  .tier-M{color:#9aa7b3}.tier-S{color:var(--accent2)}.tier-G{color:#ffd23f}
+  .tier-P{color:#b07cff}.tier-H{color:#2fd6c6}.tier-D{color:#ff5d8f}
+  .pill{display:inline-block;font-size:10px;padding:1px 7px;border-radius:20px;margin-right:6px;vertical-align:middle}
+  .pill.mp{background:#173a2e;color:#5fe39b;border:1px solid #1f5e44}
+  .pill.dmz{background:#3a2a12;color:var(--dmz);border:1px solid #6b4a16}
+  .cond{font-size:12px;color:var(--sub)}
+  .cond.dmz{color:var(--dmz)}
+  .warn{color:var(--warn);font-size:11px}
+  .row-special{background:rgba(78,161,255,.04)}
+  .row-comp{background:rgba(255,122,69,.03)}
+  .done td.camo{text-decoration:line-through;opacity:.6}
+  .mastery{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:8px}
+  .mastery h3{margin:0 0 10px;font-size:14px;color:var(--accent)}
+  .mlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .mcard{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--panel2)}
+  .mcard .mt{font-weight:600;margin-bottom:4px}
+  .mcard .md{font-size:12px;color:var(--sub)}
+  footer{color:var(--sub);font-size:11px;padding:20px 18px;border-top:1px solid var(--line)}
+  details summary{cursor:pointer;outline:none}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--sub);margin-top:8px}
+  .legend span b{color:var(--txt)}
+  .saved{font-size:12px;color:var(--ok);opacity:0;transition:opacity .3s;align-self:center}
+  .saved.show{opacity:1}
+  .memnote{font-size:11px;color:var(--sub);margin-left:auto;align-self:center}
+  .memnote b{color:var(--accent2)}
+</style>
+</head>
+<body>
+<header>
+  <h1>使命召唤23：现代战争4（MW4）迷彩任务勾选清单</h1>
+  <div class="sub">每把枪的 Military + 3 Special + Gold / Platinum / Harmonic Break / Divergence 全部条件，DMZ 刷取条件已单列高亮 · 勾选状态保存在本浏览器（localStorage）</div>
+  <div class="barwrap"><div class="bar" id="bar"></div><div class="barlabel" id="barlabel">0 / 0</div></div>
+  <div class="controls">
+    <input type="text" id="search" placeholder="搜索武器名 / 迷彩名…" />
+    <button id="expandAll">展开全部</button>
+    <button id="collapseAll">收起全部</button>
+    <button id="exportBtn">导出进度</button>
+    <button id="importBtn">导入进度</button>
+    <button id="resetBtn">清空全部</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" />
+    <span id="saved" class="saved"></span>
+    <span class="memnote">记忆：进度自动存于<b>本浏览器</b> · <b>每位访客进度独立</b>（互不干扰）· 换设备用「导出/导入」迁移</span>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div class="legend">
+    <span><b>军事</b>=Military(满级) · <b>特殊</b>=Special · <b>金</b>=Gold · <b>铂金</b>=Platinum · <b>谐波破碎</b>=Harmonic Break · <b>分歧</b>=Divergence（迷彩名格式：中文(英文原名)）</span>
+  </div>
+</header>
+<main id="main"></main>
+<footer>
+  数据来源：GameRant / Maxbit Games MW4 迷彩攻略（2026-10 首发版本）。标 <span class="warn">⚠️</span> 处为攻略原文缺失或前后矛盾，请以游戏内实际数值为准。
+  Divergence 在完成全游戏 33 个 Harmonic Break 后自动解锁（无专属挑战）。Mastery 大师迷彩分 MP / DMZ / 战区三条独立线。
+</footer>
+
+<script>
+/* ===== 数据：33 把首发武器 ===== */
+const CAT_COMP = {
+  "突击步枪":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"50 爆头",dmz:"100 爆头"},hb:{mp:"25 双杀",dmz:"50 双杀"}},
+  "微型冲锋枪":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"25 背后击杀",dmz:"75 背后击杀"},hb:{mp:"50 腰射",dmz:"100 腰射"}},
+  "霰弹枪":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"50 腰射",dmz:"125 腰射"},hb:{mp:"不换弹 2 杀 ×25",dmz:"不换弹 2 杀 ×50"}},
+  "轻机枪":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"不死 3 杀 ×15",dmz:"无伤 3 杀 ×50"},hb:{mp:"按住扳机不松 2 杀 ×25",dmz:"按住扳机不松 2 杀 ×75"}},
+  "精确射手步枪":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"75 卧姿击杀",dmz:"150 卧姿击杀"},hb:{mp:"75 一击必杀",dmz:"150 一击必杀"}},
+  "狙击步枪":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"75 卧姿击杀",dmz:"150 卧姿击杀"},hb:{mp:"75 一击必杀",dmz:"150 一击必杀"}},
+  "手枪":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"20 背后击杀",dmz:"75 背后击杀"},hb:{mp:"40 腰射",dmz:"100 腰射"}},
+  "发射器":{gold:{mp:"单局 15 杀",dmz:"单局 50 杀"},plat:{mp:"无伤 2 杀 ×15",dmz:"无伤 2 杀 ×50"},hb:{mp:"单局 10 杀 ×7",dmz:"单局 10 杀 ×15"}},
+  "冷兵器":{gold:{mp:"单局 15 杀",dmz:"单局 100 歼灭"},plat:{mp:"无伤 3 杀 ×15",dmz:"无伤 3 杀 ×50"},hb:{mp:"25 背后击杀",dmz:"75 背后击杀"}}
+};
+
+const WEAPONS = [{cat:"突击步枪",name:"Han 86",cn:"汉86",lvl:4,s:[
+   {"n":"Smoke",cn:"烟雾",mp:"20 架枪击杀",dmz:"75 架枪击杀"},
+   {"n":"Stormwave",cn:"风暴波",mp:"50 消音器击杀",dmz:"125 消音器击杀"},
+   {"n":"Red",cn:"红",mp:"不死 3 杀 ×15 次",dmz:"无伤 3 杀 ×50 次"}]},
+{cat:"突击步枪",name:"M4",lvl:14,s:[
+   {"n":"Myriad",mp:"20 贴脸击杀",dmz:"75 贴脸击杀"},
+   {"n":"Night Ops",cn:"夜战",mp:"20 架枪击杀",dmz:"75 架枪击杀"},
+   {"n":"Green",cn:"绿",mp:"25 背后击杀",dmz:"100 背后击杀"}]},
+{cat:"突击步枪",name:"Hyeon Burst",cn:"玄铁(点射型)",lvl:21,s:[
+   {"n":"Ponderosa",cn:"黄松",mp:"不换弹 2 杀 ×10 次",dmz:"不换弹 2 杀 ×30 次"},
+   {"n":"Red Rain",cn:"红雨",mp:"20 远程击杀",dmz:"75 远程击杀"},
+   {"n":"Kitty Kaos",cn:"小猫混乱",mp:"100 全自动击杀",dmz:"250 消音器击杀"}]},
+{cat:"突击步枪",name:"Patriot XMR",cn:"爱国者XMR",lvl:27,s:[
+   {"n":"Dune Sea",cn:"沙丘海",mp:"20 腰射击杀",dmz:"75 腰射击杀"},
+   {"n":"Scorch",cn:"焦痕",mp:"50 消音器击杀",dmz:"125 消音器击杀"},
+   {"n":"Disperse",cn:"消散",mp:"30 远程击杀",dmz:"100 远程击杀"}]},
+{cat:"突击步枪",name:"Kastov 762",cn:"卡斯托夫762",lvl:34,s:[
+   {"n":"SAMNIM",cn:"萨姆尼姆",mp:"不死 3 杀 ×10 次",dmz:"无伤 5 杀 ×25 次"},
+   {"n":"Raster AUX",cn:"栅格辅助",mp:"20 远程击杀",dmz:"75 远程击杀"},
+   {"n":"Yellow",cn:"黄",mp:"30 腰射击杀",dmz:"100 腰射击杀"}]},
+{cat:"突击步枪",name:"Oden",cn:"欧登",lvl:39,s:[
+   {"n":"Dark Moss",cn:"暗苔",mp:"25 Miri 40mm 榴弹击杀",dmz:"75 Miri 40mm 榴弹击杀"},
+   {"n":"Shale",cn:"页岩",mp:"不换弹 2 杀 ×10 次",dmz:"不换弹 2 杀 ×30 次"},
+   {"n":"Hot Rod",cn:"热杆",mp:"100 开镜(ADS)击杀",dmz:"250 开镜(ADS)击杀"}]},
+{cat:"突击步枪",name:"Axion",cn:"阿克西恩",lvl:52,s:[
+   {"n":"Splinter Rock",cn:"碎石",mp:"20 远程击杀",dmz:"75 远程击杀"},
+   {"n":"Sunset Tropic",cn:"热带落日",mp:"25 Miri 40mm 榴弹击杀",dmz:"75 Miri 40mm 榴弹击杀"},
+   {"n":"Cyan",cn:"青",mp:"不换弹 2 杀 ×25 次",dmz:"不换弹 2 杀 ×50 次"}]},
+{cat:"突击步枪",name:"Cronen Squall",cn:"克洛南烈风",lvl:55,s:[
+   {"n":"Oni",cn:"鬼",mp:"20 贴脸击杀",dmz:"75 贴脸击杀"},
+   {"n":"Urban Smoke",cn:"都市烟雾",mp:"20 架枪击杀",dmz:"20 架枪击杀"},
+   {"n":"Optical Reverb",cn:"光学混响",mp:"不死 3 杀 ×15 次",dmz:"50 开镜(ADS)击杀"}]},
+{cat:"微型冲锋枪",name:"ISO Nightshade",cn:"ISO夜影",lvl:4,s:[
+   {"n":"Asphalt",cn:"沥青",mp:"50 开镜(ADS)击杀",dmz:"125 开镜(ADS)击杀"},
+   {"n":"Black Topo",cn:"黑色地形",mp:"10 双杀",dmz:"30 双杀"},
+   {"n":"Brown",cn:"棕",mp:"不死 3 杀 ×15 次",dmz:"无伤 3 杀 ×50 次"}]},
+{cat:"微型冲锋枪",name:"VEL 46",cn:"威尔46",lvl:5,s:[
+   {"n":"Jungle Shadow",cn:"威尔46",mp:"50 开镜(ADS)击杀",dmz:"125 开镜(ADS)击杀"},
+   {"n":"Ghast",cn:"苍白",mp:"20 趴下击杀",dmz:"100 趴下击杀"},
+   {"n":"Gunmetal",cn:"枪械金属",mp:"20 爆头击杀",dmz:"75 爆头击杀",dmzWarn:true}]},
+{cat:"微型冲锋枪",name:"Wz.55 Striga",cn:"Wz55斯崔加",lvl:18,s:[
+   {"n":"Stellation",cn:"星芒",mp:"50 消音器击杀",dmz:"125 消音器击杀"},
+   {"n":"Rattlesnake",cn:"响尾蛇",mp:"20 跳跃击杀",dmz:"50 跳跃击杀"},
+   {"n":"Dark Tan",cn:"暗棕",mp:"40 贴脸击杀",dmz:"100 贴脸击杀"}]},
+{cat:"微型冲锋枪",name:"PPSh-41",lvl:30,s:[
+   {"n":"Blackwell",cn:"黑井",mp:"10 双杀",dmz:"30 双杀"},
+   {"n":"Iron",cn:"铁",mp:"20 远程击杀",dmz:"75 远程击杀"},
+   {"n":"Currents",cn:"水流",mp:"100 开镜(ADS)击杀",dmz:"250 开镜(ADS)击杀"}]},
+{cat:"微型冲锋枪",name:"X-58 Nyx",cn:"X-58夜神",lvl:46,s:[
+   {"n":"Sniper Veil",cn:"狙击面纱",mp:"20 移动中击杀",dmz:"75 移动中击杀"},
+   {"n":"Carbonated",cn:"碳化",mp:"20 远程击杀",dmz:"75 远程击杀"},
+   {"n":"Lime",cn:"青柠",mp:"40 爆头击杀",dmz:"100 爆头击杀"}]},
+{cat:"霰弹枪",name:"Rezi 12",cn:"雷兹12",lvl:4,s:[
+   {"n":"Struck Oil",cn:"原油",mp:"20 贴脸击杀",dmz:"75 贴脸击杀"},
+   {"n":"Brush Stroke",cn:"笔触",mp:"10 远程击杀",dmz:"50 远程击杀"},
+   {"n":"White Pine",cn:"白松",mp:"40 跳跃击杀",dmz:"100 跳跃击杀"}]},
+{cat:"霰弹枪",name:"Warlord",cn:"战将",lvl:32,s:[
+   {"n":"Redshift",cn:"红移",mp:"20 移动中击杀",dmz:"75 移动中击杀"},
+   {"n":"Corrupted Clay",cn:"腐化黏土",mp:"10 双杀",dmz:"30 双杀"},
+   {"n":"Magma Ire",cn:"岩浆怒",mp:"50 趴下击杀",dmz:"125 趴下击杀"}]},
+{cat:"轻机枪",name:"FiNN LMG",cn:"菲恩轻机枪",lvl:4,s:[
+   {"n":"Desert Tactics",cn:"沙漠战术",mp:"20 贴脸击杀",dmz:"75 贴脸击杀"},
+   {"n":"Thunderhead",cn:"雷暴",mp:"30 远程击杀",dmz:"100 远程击杀"},
+   {"n":"Green Tiger",cn:"绿虎",mp:"不换弹 2 杀 ×10 次",dmz:"不换弹 2 杀 ×30 次"}]},
+{cat:"轻机枪",name:"Type 73",cn:"73式",lvl:9,s:[
+   {"n":"Outcrop",cn:"露头",mp:"10 双杀",dmz:"30 双杀"},
+   {"n":"Foxtrail",cn:"狐踪",mp:"40 爆头击杀",dmz:"75 爆头击杀",dmzWarn:true},
+   {"n":"Ash Pine",cn:"灰松",mp:"20 架枪击杀",dmz:"75 架枪击杀"}]},
+{cat:"轻机枪",name:"APOC-338",cn:"APOC 338",lvl:44,s:[
+   {"n":"Phantom Flux",cn:"幻影流",mp:"20 腰射击杀",dmz:"75 腰射击杀"},
+   {"n":"Mineral",cn:"矿物",mp:"20 远程击杀",dmz:"75 远程击杀"},
+   {"n":"Tiger Swipe",cn:"虎爪",mp:"100 趴下击杀",dmz:"250 趴下击杀"}]},
+{cat:"精确射手步枪",name:"MAR-9",lvl:4,s:[
+   {"n":"Mangrove",cn:"红树",mp:"20 架枪击杀",dmz:"75 架枪击杀"},
+   {"n":"Fungal Grid",cn:"真菌网格",mp:"25 蹲姿击杀",dmz:"75 蹲姿击杀"},
+   {"n":"White",cn:"白",mp:"30 远程击杀",dmz:"100 远程击杀"}]},
+{cat:"精确射手步枪",name:"Oris 8.6",cn:"奥里斯8.6",lvl:11,s:[
+   {"n":"Hibiscus",cn:"木槿",mp:"10 瞬狙击杀",dmz:"50 瞬狙击杀"},
+   {"n":"Fire Topo",cn:"火焰地形",mp:"20 双杀",dmz:"50 双杀"},
+   {"n":"Deep Space",cn:"深空",mp:"不死 3 杀 ×15 次",dmz:"无伤 3 杀 ×50 次"}]},
+{cat:"精确射手步枪",name:"Mosin-Nagant",cn:"莫辛-纳甘",lvl:36,s:[
+   {"n":"Ice Sheer",cn:"冰崖",mp:"25 爆头击杀",dmz:"75 爆头击杀",dmzWarn:true},
+   {"n":"Fractal Snow",cn:"分形雪",mp:"不换弹 2 杀 ×10 次",dmz:"无伤 2 杀 ×30 次"},
+   {"n":"Sticker Shock",cn:"贴纸冲击",mp:"100 专注击杀",dmz:"250 专注击杀"}]},
+{cat:"狙击步枪",name:"KG-7 Vulcan",cn:"KG-7火神",lvl:4,s:[
+   {"n":"Treeline",cn:"树线",mp:"10 腰射击杀",dmz:"25 腰射击杀",dmzWarn:true},
+   {"n":"Spidersilk",cn:"蛛丝",mp:"20 爆头击杀",dmz:"75 专注击杀"},
+   {"n":"Tension",cn:"张力",mp:"无伤 2 杀 ×20 次",dmz:"无伤 2 杀 ×30 次"}]},
+{cat:"狙击步枪",name:"Astaroth .57",cn:"点57阿塔罗斯",lvl:25,s:[
+   {"n":"Dry Brush",cn:"干笔",mp:"不死 3 杀 ×10 次",dmz:"无伤 3 杀 ×25 次"},
+   {"n":"Backcountry",cn:"荒野",mp:"20 架枪击杀",dmz:"75 架枪击杀"},
+   {"n":"Dread Plague",cn:"恐怖瘟疫",mp:"5 秒内 2 杀 ×20 次",dmz:"5 秒内 2 杀 ×50 次"}]},
+{cat:"狙击步枪",name:"Signal 50",cn:"西格诺50",lvl:50,s:[
+   {"n":"Anaconda",cn:"森蚺",mp:"5 秒内 2 杀 ×10 次",dmz:"5 秒内 2 杀 ×25 次"},
+   {"n":"Ripplewave",cn:"涟漪波",mp:"20 瞬狙击杀",dmz:"30 瞬狙击杀"},
+   {"n":"Sunburn",cn:"晒伤",mp:"40 远程击杀",dmz:"100 一击必杀",dmzWarn:true}]},
+{cat:"手枪",name:"SANG 9mm",cn:"尚武9毫米机匣",lvl:4,s:[
+   {"n":"Autumn",cn:"秋",mp:"25 开镜(ADS)击杀",dmz:"75 开镜(ADS)击杀"},
+   {"n":"Snakeskin",cn:"蛇皮",mp:"无伤 3 杀 ×5 次",dmz:"无伤 3 杀 ×15 次"},
+   {"n":"Space Time",cn:"时空",mp:"50 双持击杀",dmz:"125 双持击杀"}]},
+{cat:"手枪",name:"Krait P68",cn:"环蛇P68",lvl:7,s:[
+   {"n":"Off Grid",cn:"离网",mp:"15 悬檐击杀",dmz:"50 悬檐击杀"},
+   {"n":"Urban Flamingo",cn:"都市火烈鸟",mp:"15 贴脸击杀",dmz:"50 贴脸击杀"},
+   {"n":"Smokescreen",cn:"烟幕",mp:"50 消音器击杀",dmz:"125 消音器击杀"}]},
+{cat:"手枪",name:".50 GS",cn:"点50GS",lvl:41,s:[
+   {"n":"Frosted",cn:"点50GS",mp:"20 爆头击杀",dmz:"75 爆头击杀"},
+   {"n":"Splatter Ops",cn:"泼溅",mp:"7 双杀",dmz:"20 双杀"},
+   {"n":"Red Tiger",cn:"红虎",mp:"30 贴脸击杀",dmz:"75 贴脸击杀"}]},
+{cat:"手枪",name:"Mojave .357",cn:"莫哈韦点357",lvl:48,s:[
+   {"n":"Miami",cn:"迈阿密",mp:"15 一击必杀",dmz:"50 一击必杀"},
+   {"n":"Wallpaper",cn:"壁纸",mp:"不换弹 2 杀 ×10 次",dmz:"不换弹 2 杀 ×20 次"},
+   {"n":"Garland",cn:"花环",mp:"30 贴脸击杀",dmz:"75 贴脸击杀"}]},
+{cat:"发射器",name:"PILA",cn:"针式导弹",lvl:4,s:[
+   {"n":"Frontier",cn:"针式导弹",mp:"10 直击击杀",dmz:"25 直击击杀"},
+   {"n":"Sandwash",cn:"沙洗",mp:"5 双杀",dmz:"100 双杀",dmzWarn:true},
+   {"n":"Digital Fall",cn:"数字坠落",mp:"摧毁 30 连杀/载具",dmz:"摧毁 50 连杀/载具"}]},
+{cat:"发射器",name:"RPG-8",lvl:23,s:[
+   {"n":"Digi Bark",mp:"10 趴下击杀",dmz:"25 趴下击杀"},
+   {"n":"Stone Bits",cn:"石屑",mp:"10 远程击杀",dmz:"25 远程击杀"},
+   {"n":"Bubblegum Ops",cn:"泡泡糖",mp:"摧毁 30 连杀/载具",dmz:"摧毁 50 连杀/载具"}]},
+{cat:"发射器",name:"JOKR",cn:"标枪导弹",lvl:43,s:[
+   {"n":"Thicket",cn:"标枪导弹",mp:"5 双杀",dmz:"15 双杀"},
+   {"n":"Tectonic",cn:"构造",mp:"10 远程击杀",dmz:"25 远程击杀"},
+   {"n":"Blue Tiger",cn:"蓝虎",mp:"摧毁 30 连杀/载具",dmz:"摧毁 50 连杀/载具"}]},
+{cat:"发射器",name:"PM-40 Anvil",cn:"PM-40铁砧",lvl:54,s:[
+   {"n":"Night Snow",cn:"夜雪",mp:"25 直击击杀",dmz:"25 直击击杀"},
+   {"n":"Recursive",cn:"递归",mp:"不换弹 2 杀 ×5 次",dmz:"不换弹 2 杀 ×20 次"},
+   {"n":"Urban Standard",cn:"都市标准",mp:"40 移动中击杀",dmz:"100 移动中击杀"}]},
+{cat:"冷兵器",name:"FSS Carbon Edge 1095",cn:"FSS碳钢刀锋1095",lvl:4,s:[
+   {"n":"Raster Lite",cn:"栅格精简",mp:"25 跳跃击杀",dmz:"100 跳跃击杀"},
+   {"n":"Stockpile",cn:"囤积",mp:"25 重型近战处决",dmz:"75 重型近战处决"},
+   {"n":"Deathbed",cn:"临终",mp:"5 秒内 2 杀 ×25 次",dmz:"5 秒内 2 杀 ×50 次"}]}
+];
+
+/* 全局大师迷彩（非每把枪，三条独立线） */
+const MASTERY = [
+ {line:"多人 MP",items:[
+   {n:"Mercurial Drift",d:"单局 10 杀 ×250 次"},
+   {n:"Polyatomic Reforged",d:"无伤 3 杀连击 ×300 次"},
+   {n:"Orion Reforged",d:"不死 5 杀 ×500 次（终极大师）"}]},
+ {line:"僵尸/DMZ",items:[
+   {n:"Chiral",d:"Tier 3+ 敌人击杀 2,500"},
+   {n:"Ripple Tide",d:"单次部署带 2 个中尉狗牌撤离 ×50"},
+   {n:"Helio",d:"满级特工用传说武器击杀（⚠️ 数值冲突：2.5万 / 25万，以游戏内为准）"}]},
+ {line:"战区 Warzone（第1赛季）",items:[
+   {n:"Parallax",d:"挑战要求官方未公布"},
+   {n:"Damascus Reforged",d:"挑战要求官方未公布"},
+   {n:"Empyros",d:"挑战要求官方未公布"}]}
+];
+
+/* ===== 渲染 ===== */
+const STORE_KEY = "mw4camo_v1";
+let state = loadState();
+
+function loadState(){
+  try{ const s=localStorage.getItem(STORE_KEY); return s?JSON.parse(s):{}; }catch(e){ return {}; }
+}
+let lastSaveOK = true;
+function safeSet(v){ try{ localStorage.setItem(STORE_KEY, v); return true; }catch(e){ return false; } }
+function showSaved(){
+  const el=document.getElementById("saved");
+  if(!el) return;
+  el.textContent = lastSaveOK
+    ? ("✓ 已保存 "+new Date().toLocaleTimeString("zh-CN"))
+    : "⚠️ 当前环境禁止本地保存，进度仅本次会话有效（可用「导出进度」备份）";
+  el.classList.add("show");
+  clearTimeout(showSaved._t);
+  showSaved._t=setTimeout(()=>el.classList.remove("show"),2200);
+}
+function saveState(){ lastSaveOK = safeSet(JSON.stringify(state)); showSaved(); }
+function key(w,n){ return w+"::"+n; }
+function isDone(w,n){ return !!state[key(w,n)]; }
+// 先更新界面，再尝试存盘：即使存储被禁用，勾选与进度也实时生效
+function toggle(w,n){ const k=key(w,n); state[k]=!state[k]; updateProgress(); saveState(); }
+
+const CATS = [...new Set(WEAPONS.map(w=>w.cat))];
+const main = document.getElementById("main");
+
+function buildWeapon(w){
+  const comp = CAT_COMP[w.cat];
+  // 8 个勾选项：M + 3S + G + P + H + D
+  const rows = [];
+  rows.push({id:"M",tier:"M",label:"军事迷彩(满级)",cls:"",
+    mp:"武器升到满级自动解锁 8 个军事迷彩",dmz:"同左（满级即解锁）"});
+  w.s.forEach((c,i)=>{
+    rows.push({id:"S"+(i+1),tier:"S",label:(c.cn?c.cn+" ":"")+c.n,cls:"row-special",mp:c.mp,dmz:c.dmz,dmzWarn:c.dmzWarn});
+  });
+  rows.push({id:"G",tier:"G",label:"金 Gold",cls:"row-comp",mp:comp.gold.mp,dmz:comp.gold.dmz});
+  rows.push({id:"P",tier:"P",label:"铂金 Platinum",cls:"row-comp",
+    mp:comp.plat.mp+"（需同类全金）",dmz:comp.plat.dmz+"（需同类全金）"});
+  rows.push({id:"H",tier:"H",label:"谐波破碎 Harmonic Break",cls:"row-comp",
+    mp:comp.hb.mp+"（需全游戏 33 铂金）",dmz:comp.hb.dmz+"（需全游戏 33 铂金）"});
+  rows.push({id:"D",tier:"D",label:"分歧 Divergence",cls:"row-comp",
+    mp:"完成 33 个 Harmonic Break 后自动解锁",dmz:"同左（无专属挑战）"});
+
+  const total = rows.length;
+  const done = rows.filter(r=>isDone(w.name,r.id)).length;
+  const pct = Math.round(done/total*100);
+
+  let html = `<details class="weapon" data-cat="${w.cat}" data-name="${w.name}">
+    <summary class="whead">
+      <span class="wname">${w.cn?w.cn+" ":""}${w.name}</span>
+      <span class="wlvl">解锁 Lv.${w.lvl}</span>
+      <span class="wmini"><i style="width:${pct}%"></i></span>
+      <span class="wprog">${done}/${total} · ${pct}%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th></tr></thead>
+      <tbody>`;
+  rows.forEach(r=>{
+    const d = isDone(w.name,r.id);
+    const dmzWarn = r.dmzWarn ? ' <span class="warn">⚠️</span>' : '';
+    html += `<tr class="${r.cls} ${d?'done':''}" data-r="${r.id}">
+      <td class="ck"><input type="checkbox" ${d?'checked':''} onchange="toggle('${w.name}','${r.id}')"></td>
+      <td class="camo tier-${r.tier}">${r.label}</td>
+      <td class="cond">${r.mp}</td>
+      <td class="cond dmz">${r.dmz}${dmzWarn}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></details>`;
+  return html;
+}
+
+function buildMastery(){
+  let html = `<div class="cat"><h2>全局大师迷彩 Mastery（非每把枪）</h2><div class="mastery"><div class="mlist">`;
+  MASTERY.forEach(line=>{
+    line.items.forEach(it=>{
+      const d = isDone("MASTERY",it.n);
+      html += `<div class="mcard ${d?'done':''}">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" ${d?'checked':''} onchange="toggle('MASTERY','${it.n}')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">${it.n}</span><br><span class="md">[${line.line}] ${it.d}</span></span>
+        </label></div>`;
+    });
+  });
+  html += `</div></div></div>`;
+  return html;
+}
+
+function render(){
+  let html = "";
+  CATS.forEach(cat=>{
+    const ws = WEAPONS.filter(w=>w.cat===cat);
+    const all = ws.flatMap(w=>{
+      const comp=CAT_COMP[w.cat];
+      const ids=["M","S1","S2","S3","G","P","H","D"];
+      return ids.map(id=>isDone(w.name,id));
+    });
+    const done = all.filter(Boolean).length;
+    const pct = Math.round(done/all.length*100);
+    html += `<div class="cat" data-cat="${cat}"><h2>${cat} <span class="cprog">${done}/${all.length} · ${pct}%</span></h2>`;
+    ws.forEach(w=> html += buildWeapon(w));
+    html += `</div>`;
+  });
+  html += buildMastery();
+  main.innerHTML = html;
+  applyFilter();
+}
+
+function updateProgress(){
+  // 重新计算所有进度（包含顶部总进度 + 各武器/类别），不整体重渲染以保持展开状态
+  const allIds = [];
+  WEAPONS.forEach(w=>["M","S1","S2","S3","G","P","H","D"].forEach(id=>allIds.push([w.name,id])));
+  MASTERY.forEach(l=>l.items.forEach(it=>allIds.push(["MASTERY",it.n])));
+  const done = allIds.filter(([w,n])=>isDone(w,n)).length;
+  const total = allIds.length;
+  const pct = Math.round(done/total*100);
+  const bar=document.getElementById("bar"); if(bar) bar.style.width = pct+"%";
+  const bl=document.getElementById("barlabel"); if(bl) bl.textContent = `${done} / ${total} · ${pct}%`;
+  // 更新各武器迷你条与类别进度
+  document.querySelectorAll("details.weapon").forEach(det=>{
+    const wname = det.dataset.name;
+    const ids=["M","S1","S2","S3","G","P","H","D"];
+    const wd = ids.filter(id=>isDone(wname,id)).length;
+    const wp = Math.round(wd/ids.length*100);
+    det.querySelector(".wmini i").style.width = wp+"%";
+    det.querySelector(".wprog").textContent = `${wd}/${ids.length} · ${wp}%`;
+  });
+  document.querySelectorAll(".cat[data-cat]").forEach(catEl=>{
+    const cat = catEl.dataset.cat;
+    const ws = WEAPONS.filter(w=>w.cat===cat);
+    let d=0,t=0;
+    ws.forEach(w=>["M","S1","S2","S3","G","P","H","D"].forEach(id=>{t++;if(isDone(w.name,id))d++;}));
+    const cp=Math.round(d/t*100);
+    const el=catEl.querySelector(".cprog"); if(el) el.textContent=`${d}/${t} · ${cp}%`;
+  });
+}
+
+/* 筛选 */
+function applyFilter(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const active = document.querySelector(".filters button.active");
+  const catf = active ? active.dataset.cat : "全部";
+  document.querySelectorAll("details.weapon").forEach(det=>{
+    const name = det.dataset.name.toLowerCase();
+    const cat = det.dataset.cat;
+    const matchCat = (catf==="全部"||cat===catf);
+    const matchQ = (!q || name.includes(q));
+    det.style.display = (matchCat&&matchQ) ? "" : "none";
+  });
+}
+
+function buildFilters(){
+  const f = document.getElementById("filters");
+  const all = ["全部",...CATS];
+  f.innerHTML = all.map(c=>`<button data-cat="${c}" class="${c==='全部'?'active':''}">${c}</button>`).join("");
+  f.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    f.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); applyFilter();
+  });
+}
+
+/* 事件 */
+document.getElementById("search").addEventListener("input",applyFilter);
+document.getElementById("expandAll").onclick=()=>document.querySelectorAll("details.weapon").forEach(d=>d.open=true);
+document.getElementById("collapseAll").onclick=()=>document.querySelectorAll("details.weapon").forEach(d=>d.open=false);
+document.getElementById("resetBtn").onclick=()=>{
+  if(confirm("确定清空本浏览器保存的全部勾选进度？此操作不可撤销。")){
+    state={}; saveState(); render(); updateProgress();
+  }
+};
+document.getElementById("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="mw4-camo-progress.json"; a.click();
+};
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader(); r.onload=()=>{ try{ state=JSON.parse(r.result); saveState(); render(); updateProgress(); alert("导入成功"); }catch(err){ alert("文件格式错误"); } };
+  r.readAsText(f);
+};
+
+/* 初始化 */
+buildFilters();
+render();
+updateProgress();
+</script>
+</body>
+</html>
