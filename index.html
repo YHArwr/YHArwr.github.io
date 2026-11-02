@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MW4 迷彩任务勾选清单（含前置依赖 / DMZ）</title>
 <style>
   :root{
@@ -105,6 +103,8 @@
   .nchip{font-size:12px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 11px;cursor:pointer}
   .nchip:hover{border-color:var(--accent)}
   .nsnone{font-size:12px;color:var(--sub);opacity:.6}
+  .menu-toggle{display:none}
+  .weapon{scroll-margin-top:64px}
 
   /* ===== 移动端适配 ===== */
   @media (max-width: 760px){
@@ -113,6 +113,11 @@
     h1{font-size:15px;line-height:1.35}
     .sub{font-size:11px;margin-bottom:8px}
     .controls{gap:6px}
+    .menu-toggle{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:9px;font-size:13px;cursor:pointer}
+    .menu-toggle:active{border-color:var(--accent)}
+    #ctrlpanel{display:none;margin-top:10px}
+    #ctrlpanel.open{display:block}
+    .weapon{scroll-margin-top:112px}
     input[type=text]{min-width:0;width:100%;flex:1 1 100%}
     .controls button{flex:1 1 auto;padding:8px 10px;font-size:13px}
     .filters{margin-top:8px}
@@ -152,26 +157,1855 @@
 <body>
 <header>
   <h1>使命召唤23：现代战争4（MW4）迷彩任务勾选清单 · 带前置依赖</h1>
-  <div class="sub">每把枪的阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)。DMZ 条件已单列高亮。</div>
-  <div class="barwrap"><div class="bar" id="bar"></div><div class="barlabel" id="barlabel">0 / 0</div></div>
-  <div class="controls">
-    <input type="text" id="search" placeholder="搜索武器名 / 迷彩名…" />
-    <button id="expandAll">展开全部</button>
-    <button id="collapseAll">收起全部</button>
-    <button id="exportBtn">导出进度</button>
-    <button id="importBtn">导入进度</button>
-    <button id="resetBtn">清空全部</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" />
-    <span id="saved" class="saved"></span>
-    <span class="memnote">进度自动存于<b>本浏览器</b> · <b>每位访客进度独立</b> · 换设备用「导出/导入」迁移</span>
-  </div>
-  <div class="filters" id="filters"></div>
-  <div class="legend">
-    <span><b>状态含义</b>：<span class="chip done">✓ 已完成</span> 已勾选 · <span class="chip avail">● 可刷</span> 前置已满足、可开刷 · <span class="chip lock">🔒 锁定</span> 前置未完成（右侧写明缺什么）</span>
-    <span>迷彩名格式：中文(英文原名)</span>
+  <div class="barwrap"><div class="bar" id="bar" style="width: 0%;"></div><div class="barlabel" id="barlabel">0 / 240 · 0%</div></div>
+  <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false">展开 ▾</button>
+  <div id="ctrlpanel">
+    <div class="sub">每把枪的阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)。DMZ 条件已单列高亮。</div>
+    <div class="controls">
+      <input type="text" id="search" placeholder="搜索武器名 / 迷彩名…">
+      <button id="expandAll">展开全部</button>
+      <button id="collapseAll">收起全部</button>
+      <button id="exportBtn">导出进度</button>
+      <button id="importBtn">导入进度</button>
+      <button id="resetBtn">清空全部</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+      <span id="saved" class="saved"></span>
+      <span class="memnote">进度自动存于<b>本浏览器</b> · <b>每位访客进度独立</b> · 换设备用「导出/导入」迁移</span>
+    </div>
+    <div class="filters" id="filters"><button data-cat="全部" class="active">全部</button><button data-cat="突击步枪" class="">突击步枪</button><button data-cat="微型冲锋枪" class="">微型冲锋枪</button><button data-cat="霰弹枪" class="">霰弹枪</button><button data-cat="轻机枪" class="">轻机枪</button><button data-cat="精确射手步枪" class="">精确射手步枪</button><button data-cat="狙击步枪" class="">狙击步枪</button><button data-cat="手枪" class="">手枪</button><button data-cat="发射器" class="">发射器</button><button data-cat="冷兵器" class="">冷兵器</button></div>
+    <div class="legend">
+      <span><b>状态含义</b>：<span class="chip done">✓ 已完成</span> 已勾选 · <span class="chip avail">● 可刷</span> 前置已满足、可开刷 · <span class="chip lock">🔒 锁定</span> 前置未完成（右侧写明缺什么）</span>
+      <span>迷彩名格式：中文(英文原名)</span>
+    </div>
   </div>
 </header>
-<main id="main"></main>
+<main id="main">
+    <div id="globalstats">
+   <div class="gstat"><div class="gnum">0<span>/33</span></div><div class="glabel">金 Gold</div></div>
+   <div class="gstat"><div class="gnum">0<span>/33</span></div><div class="glabel">铂金 Platinum</div></div>
+   <div class="gstat"><div class="gnum">0<span>/33</span></div><div class="glabel">谐波破碎 HB</div></div>
+   <div class="gstat "><div class="gnum">⏳<span>0/33</span></div><div class="glabel">分歧 Divergence（自动）</div></div></div>
+    <div id="nextsteps"><div class="nst">下一步：前置已满足、但还没刷的武器（按可刷档位分组，点名字可定位）</div><div class="nsblock"><div class="nshead">🟡 可刷「金」(本武器军事+3特殊已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div><div class="nsblock"><div class="nshead">🟣 可刷「铂金」(本武器金+同类全金已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div><div class="nsblock"><div class="nshead">🟢 可刷「谐波破碎」(本武器铂金+全游戏33铂金已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div></div><div class="cat" data-cat="突击步枪"><h2>突击步枪 <span class="cprog">0/56 · 0%</span></h2><details class="weapon" data-cat="突击步枪" data-name="Han 86">
+    <summary class="whead">
+      <span class="wname">汉86 Han 86</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/烟雾/风暴波/红未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Han 86','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Han 86','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">烟雾 Smoke</td>
+      <td class="cond" data-label="MP 多人条件">20 架枪击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 架枪击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Han 86','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">风暴波 Stormwave</td>
+      <td class="cond" data-label="MP 多人条件">50 消音器击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 消音器击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Han 86','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">红 Red</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×15 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×50 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Han 86','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[烟雾] + 特殊[风暴波] + 特殊[红]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Han 86','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Han 86','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="突击步枪" data-name="M4">
+    <summary class="whead">
+      <span class="wname">M4</span>
+      <span class="wlvl">解锁 Lv.14</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/Myriad/夜战/绿未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('M4','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('M4','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">Myriad</td>
+      <td class="cond" data-label="MP 多人条件">20 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('M4','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">夜战 Night Ops</td>
+      <td class="cond" data-label="MP 多人条件">20 架枪击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 架枪击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('M4','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">绿 Green</td>
+      <td class="cond" data-label="MP 多人条件">25 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('M4','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[Myriad] + 特殊[夜战] + 特殊[绿]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('M4','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('M4','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="突击步枪" data-name="Hyeon Burst">
+    <summary class="whead">
+      <span class="wname">玄铁(点射型) Hyeon Burst</span>
+      <span class="wlvl">解锁 Lv.21</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/黄松/红雨/小猫混乱未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Hyeon Burst','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Hyeon Burst','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">黄松 Ponderosa</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×30 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Hyeon Burst','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">红雨 Red Rain</td>
+      <td class="cond" data-label="MP 多人条件">20 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Hyeon Burst','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">小猫混乱 Kitty Kaos</td>
+      <td class="cond" data-label="MP 多人条件">100 全自动击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">250 消音器击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Hyeon Burst','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[黄松] + 特殊[红雨] + 特殊[小猫混乱]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Hyeon Burst','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Hyeon Burst','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="突击步枪" data-name="Patriot XMR">
+    <summary class="whead">
+      <span class="wname">爱国者XMR Patriot XMR</span>
+      <span class="wlvl">解锁 Lv.27</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/沙丘海/焦痕/消散未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Patriot XMR','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Patriot XMR','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">沙丘海 Dune Sea</td>
+      <td class="cond" data-label="MP 多人条件">20 腰射击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 腰射击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Patriot XMR','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">焦痕 Scorch</td>
+      <td class="cond" data-label="MP 多人条件">50 消音器击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 消音器击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Patriot XMR','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">消散 Disperse</td>
+      <td class="cond" data-label="MP 多人条件">30 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Patriot XMR','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[沙丘海] + 特殊[焦痕] + 特殊[消散]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Patriot XMR','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Patriot XMR','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="突击步枪" data-name="Kastov 762">
+    <summary class="whead">
+      <span class="wname">卡斯托夫762 Kastov 762</span>
+      <span class="wlvl">解锁 Lv.34</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/萨姆尼姆/栅格辅助/黄未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Kastov 762','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Kastov 762','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">萨姆尼姆 SAMNIM</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 5 杀 ×25 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Kastov 762','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">栅格辅助 Raster AUX</td>
+      <td class="cond" data-label="MP 多人条件">20 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Kastov 762','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">黄 Yellow</td>
+      <td class="cond" data-label="MP 多人条件">30 腰射击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Kastov 762','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[萨姆尼姆] + 特殊[栅格辅助] + 特殊[黄]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Kastov 762','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Kastov 762','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="突击步枪" data-name="Oden">
+    <summary class="whead">
+      <span class="wname">欧登 Oden</span>
+      <span class="wlvl">解锁 Lv.39</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/暗苔/页岩/热杆未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oden','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oden','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">暗苔 Dark Moss</td>
+      <td class="cond" data-label="MP 多人条件">25 Miri 40mm 榴弹击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 Miri 40mm 榴弹击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oden','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">页岩 Shale</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×30 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oden','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">热杆 Hot Rod</td>
+      <td class="cond" data-label="MP 多人条件">100 开镜(ADS)击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">250 开镜(ADS)击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oden','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[暗苔] + 特殊[页岩] + 特殊[热杆]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oden','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oden','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="突击步枪" data-name="Axion">
+    <summary class="whead">
+      <span class="wname">阿克西恩 Axion</span>
+      <span class="wlvl">解锁 Lv.52</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/碎石/热带落日/青未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Axion','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Axion','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">碎石 Splinter Rock</td>
+      <td class="cond" data-label="MP 多人条件">20 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Axion','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">热带落日 Sunset Tropic</td>
+      <td class="cond" data-label="MP 多人条件">25 Miri 40mm 榴弹击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 Miri 40mm 榴弹击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Axion','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">青 Cyan</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×25 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×50 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Axion','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[碎石] + 特殊[热带落日] + 特殊[青]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Axion','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Axion','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="突击步枪" data-name="Cronen Squall">
+    <summary class="whead">
+      <span class="wname">克洛南烈风 Cronen Squall</span>
+      <span class="wlvl">解锁 Lv.55</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/鬼/都市烟雾/光学混响未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Cronen Squall','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Cronen Squall','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">鬼 Oni</td>
+      <td class="cond" data-label="MP 多人条件">20 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Cronen Squall','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">都市烟雾 Urban Smoke</td>
+      <td class="cond" data-label="MP 多人条件">20 架枪击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">20 架枪击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Cronen Squall','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">光学混响 Optical Reverb</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×15 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 开镜(ADS)击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Cronen Squall','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[鬼] + 特殊[都市烟雾] + 特殊[光学混响]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Cronen Squall','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 爆头</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Cronen Squall','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="微型冲锋枪"><h2>微型冲锋枪 <span class="cprog">0/35 · 0%</span></h2><details class="weapon" data-cat="微型冲锋枪" data-name="ISO Nightshade">
+    <summary class="whead">
+      <span class="wname">ISO夜影 ISO Nightshade</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/沥青/黑色地形/棕未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('ISO Nightshade','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('ISO Nightshade','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">沥青 Asphalt</td>
+      <td class="cond" data-label="MP 多人条件">50 开镜(ADS)击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 开镜(ADS)击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('ISO Nightshade','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">黑色地形 Black Topo</td>
+      <td class="cond" data-label="MP 多人条件">10 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">30 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('ISO Nightshade','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">棕 Brown</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×15 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×50 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('ISO Nightshade','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[沥青] + 特殊[黑色地形] + 特殊[棕]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('ISO Nightshade','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">25 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('ISO Nightshade','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">50 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="VEL 46">
+    <summary class="whead">
+      <span class="wname">威尔46 VEL 46</span>
+      <span class="wlvl">解锁 Lv.5</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/威尔46/苍白/枪械金属未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('VEL 46','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('VEL 46','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">威尔46 Jungle Shadow</td>
+      <td class="cond" data-label="MP 多人条件">50 开镜(ADS)击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 开镜(ADS)击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('VEL 46','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">苍白 Ghast</td>
+      <td class="cond" data-label="MP 多人条件">20 趴下击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 趴下击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('VEL 46','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">枪械金属 Gunmetal</td>
+      <td class="cond" data-label="MP 多人条件">20 爆头击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 爆头击杀 <span class="warn">⚠️</span></td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('VEL 46','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[威尔46] + 特殊[苍白] + 特殊[枪械金属]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('VEL 46','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">25 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('VEL 46','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">50 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="Wz.55 Striga">
+    <summary class="whead">
+      <span class="wname">Wz55斯崔加 Wz.55 Striga</span>
+      <span class="wlvl">解锁 Lv.18</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/星芒/响尾蛇/暗棕未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Wz.55 Striga','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Wz.55 Striga','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">星芒 Stellation</td>
+      <td class="cond" data-label="MP 多人条件">50 消音器击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 消音器击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Wz.55 Striga','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">响尾蛇 Rattlesnake</td>
+      <td class="cond" data-label="MP 多人条件">20 跳跃击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 跳跃击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Wz.55 Striga','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">暗棕 Dark Tan</td>
+      <td class="cond" data-label="MP 多人条件">40 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Wz.55 Striga','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[星芒] + 特殊[响尾蛇] + 特殊[暗棕]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Wz.55 Striga','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">25 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Wz.55 Striga','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">50 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="PPSh-41">
+    <summary class="whead">
+      <span class="wname">PPSh-41</span>
+      <span class="wlvl">解锁 Lv.30</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/黑井/铁/水流未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PPSh-41','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PPSh-41','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">黑井 Blackwell</td>
+      <td class="cond" data-label="MP 多人条件">10 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">30 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PPSh-41','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">铁 Iron</td>
+      <td class="cond" data-label="MP 多人条件">20 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PPSh-41','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">水流 Currents</td>
+      <td class="cond" data-label="MP 多人条件">100 开镜(ADS)击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">250 开镜(ADS)击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PPSh-41','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[黑井] + 特殊[铁] + 特殊[水流]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PPSh-41','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">25 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PPSh-41','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">50 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="X-58 Nyx">
+    <summary class="whead">
+      <span class="wname">X-58夜神 X-58 Nyx</span>
+      <span class="wlvl">解锁 Lv.46</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/狙击面纱/碳化/青柠未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('X-58 Nyx','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('X-58 Nyx','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">狙击面纱 Sniper Veil</td>
+      <td class="cond" data-label="MP 多人条件">20 移动中击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 移动中击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('X-58 Nyx','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">碳化 Carbonated</td>
+      <td class="cond" data-label="MP 多人条件">20 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('X-58 Nyx','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">青柠 Lime</td>
+      <td class="cond" data-label="MP 多人条件">40 爆头击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 爆头击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('X-58 Nyx','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[狙击面纱] + 特殊[碳化] + 特殊[青柠]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('X-58 Nyx','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">25 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('X-58 Nyx','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">50 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="霰弹枪"><h2>霰弹枪 <span class="cprog">0/14 · 0%</span></h2><details class="weapon" data-cat="霰弹枪" data-name="Rezi 12">
+    <summary class="whead">
+      <span class="wname">雷兹12 Rezi 12</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/原油/笔触/白松未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Rezi 12','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Rezi 12','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">原油 Struck Oil</td>
+      <td class="cond" data-label="MP 多人条件">20 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Rezi 12','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">笔触 Brush Stroke</td>
+      <td class="cond" data-label="MP 多人条件">10 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Rezi 12','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">白松 White Pine</td>
+      <td class="cond" data-label="MP 多人条件">40 跳跃击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 跳跃击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Rezi 12','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[原油] + 特殊[笔触] + 特殊[白松]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Rezi 12','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Rezi 12','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×25</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="霰弹枪" data-name="Warlord">
+    <summary class="whead">
+      <span class="wname">战将 Warlord</span>
+      <span class="wlvl">解锁 Lv.32</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/红移/腐化黏土/岩浆怒未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Warlord','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Warlord','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">红移 Redshift</td>
+      <td class="cond" data-label="MP 多人条件">20 移动中击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 移动中击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Warlord','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">腐化黏土 Corrupted Clay</td>
+      <td class="cond" data-label="MP 多人条件">10 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">30 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Warlord','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">岩浆怒 Magma Ire</td>
+      <td class="cond" data-label="MP 多人条件">50 趴下击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 趴下击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Warlord','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[红移] + 特殊[腐化黏土] + 特殊[岩浆怒]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Warlord','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">50 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Warlord','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×25</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="轻机枪"><h2>轻机枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="轻机枪" data-name="FiNN LMG">
+    <summary class="whead">
+      <span class="wname">菲恩轻机枪 FiNN LMG</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/沙漠战术/雷暴/绿虎未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FiNN LMG','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FiNN LMG','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">沙漠战术 Desert Tactics</td>
+      <td class="cond" data-label="MP 多人条件">20 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FiNN LMG','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">雷暴 Thunderhead</td>
+      <td class="cond" data-label="MP 多人条件">30 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FiNN LMG','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">绿虎 Green Tiger</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×30 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FiNN LMG','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[沙漠战术] + 特殊[雷暴] + 特殊[绿虎]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FiNN LMG','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FiNN LMG','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">按住扳机不松 2 杀 ×25</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">按住扳机不松 2 杀 ×75</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="轻机枪" data-name="Type 73">
+    <summary class="whead">
+      <span class="wname">73式 Type 73</span>
+      <span class="wlvl">解锁 Lv.9</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/露头/狐踪/灰松未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Type 73','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Type 73','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">露头 Outcrop</td>
+      <td class="cond" data-label="MP 多人条件">10 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">30 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Type 73','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">狐踪 Foxtrail</td>
+      <td class="cond" data-label="MP 多人条件">40 爆头击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 爆头击杀 <span class="warn">⚠️</span></td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Type 73','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">灰松 Ash Pine</td>
+      <td class="cond" data-label="MP 多人条件">20 架枪击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 架枪击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Type 73','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[露头] + 特殊[狐踪] + 特殊[灰松]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Type 73','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Type 73','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">按住扳机不松 2 杀 ×25</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">按住扳机不松 2 杀 ×75</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="轻机枪" data-name="APOC-338">
+    <summary class="whead">
+      <span class="wname">APOC 338 APOC-338</span>
+      <span class="wlvl">解锁 Lv.44</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/幻影流/矿物/虎爪未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('APOC-338','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('APOC-338','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">幻影流 Phantom Flux</td>
+      <td class="cond" data-label="MP 多人条件">20 腰射击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 腰射击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('APOC-338','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">矿物 Mineral</td>
+      <td class="cond" data-label="MP 多人条件">20 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('APOC-338','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">虎爪 Tiger Swipe</td>
+      <td class="cond" data-label="MP 多人条件">100 趴下击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">250 趴下击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('APOC-338','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[幻影流] + 特殊[矿物] + 特殊[虎爪]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('APOC-338','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('APOC-338','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">按住扳机不松 2 杀 ×25</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">按住扳机不松 2 杀 ×75</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="精确射手步枪"><h2>精确射手步枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="精确射手步枪" data-name="MAR-9">
+    <summary class="whead">
+      <span class="wname">MAR-9</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/红树/真菌网格/白未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('MAR-9','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('MAR-9','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">红树 Mangrove</td>
+      <td class="cond" data-label="MP 多人条件">20 架枪击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 架枪击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('MAR-9','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">真菌网格 Fungal Grid</td>
+      <td class="cond" data-label="MP 多人条件">25 蹲姿击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 蹲姿击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('MAR-9','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">白 White</td>
+      <td class="cond" data-label="MP 多人条件">30 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('MAR-9','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[红树] + 特殊[真菌网格] + 特殊[白]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('MAR-9','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">75 卧姿击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 卧姿击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('MAR-9','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">75 一击必杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 一击必杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="精确射手步枪" data-name="Oris 8.6">
+    <summary class="whead">
+      <span class="wname">奥里斯8.6 Oris 8.6</span>
+      <span class="wlvl">解锁 Lv.11</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/木槿/火焰地形/深空未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oris 8.6','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oris 8.6','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">木槿 Hibiscus</td>
+      <td class="cond" data-label="MP 多人条件">10 瞬狙击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 瞬狙击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oris 8.6','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">火焰地形 Fire Topo</td>
+      <td class="cond" data-label="MP 多人条件">20 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oris 8.6','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">深空 Deep Space</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×15 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×50 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oris 8.6','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[木槿] + 特殊[火焰地形] + 特殊[深空]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oris 8.6','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">75 卧姿击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 卧姿击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Oris 8.6','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">75 一击必杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 一击必杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="精确射手步枪" data-name="Mosin-Nagant">
+    <summary class="whead">
+      <span class="wname">莫辛-纳甘 Mosin-Nagant</span>
+      <span class="wlvl">解锁 Lv.36</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/冰崖/分形雪/贴纸冲击未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mosin-Nagant','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mosin-Nagant','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">冰崖 Ice Sheer</td>
+      <td class="cond" data-label="MP 多人条件">25 爆头击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 爆头击杀 <span class="warn">⚠️</span></td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mosin-Nagant','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">分形雪 Fractal Snow</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 2 杀 ×30 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mosin-Nagant','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">贴纸冲击 Sticker Shock</td>
+      <td class="cond" data-label="MP 多人条件">100 专注击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">250 专注击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mosin-Nagant','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[冰崖] + 特殊[分形雪] + 特殊[贴纸冲击]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mosin-Nagant','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">75 卧姿击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 卧姿击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mosin-Nagant','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">75 一击必杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 一击必杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="狙击步枪"><h2>狙击步枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="狙击步枪" data-name="KG-7 Vulcan">
+    <summary class="whead">
+      <span class="wname">KG-7火神 KG-7 Vulcan</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/树线/蛛丝/张力未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('KG-7 Vulcan','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('KG-7 Vulcan','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">树线 Treeline</td>
+      <td class="cond" data-label="MP 多人条件">10 腰射击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">25 腰射击杀 <span class="warn">⚠️</span></td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('KG-7 Vulcan','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">蛛丝 Spidersilk</td>
+      <td class="cond" data-label="MP 多人条件">20 爆头击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 专注击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('KG-7 Vulcan','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">张力 Tension</td>
+      <td class="cond" data-label="MP 多人条件">无伤 2 杀 ×20 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 2 杀 ×30 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('KG-7 Vulcan','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[树线] + 特殊[蛛丝] + 特殊[张力]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('KG-7 Vulcan','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">75 卧姿击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 卧姿击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('KG-7 Vulcan','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">75 一击必杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 一击必杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="狙击步枪" data-name="Astaroth .57">
+    <summary class="whead">
+      <span class="wname">点57阿塔罗斯 Astaroth .57</span>
+      <span class="wlvl">解锁 Lv.25</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/干笔/荒野/恐怖瘟疫未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Astaroth .57','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Astaroth .57','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">干笔 Dry Brush</td>
+      <td class="cond" data-label="MP 多人条件">不死 3 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×25 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Astaroth .57','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">荒野 Backcountry</td>
+      <td class="cond" data-label="MP 多人条件">20 架枪击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 架枪击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Astaroth .57','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">恐怖瘟疫 Dread Plague</td>
+      <td class="cond" data-label="MP 多人条件">5 秒内 2 杀 ×20 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">5 秒内 2 杀 ×50 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Astaroth .57','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[干笔] + 特殊[荒野] + 特殊[恐怖瘟疫]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Astaroth .57','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">75 卧姿击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 卧姿击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Astaroth .57','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">75 一击必杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 一击必杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="狙击步枪" data-name="Signal 50">
+    <summary class="whead">
+      <span class="wname">西格诺50 Signal 50</span>
+      <span class="wlvl">解锁 Lv.50</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/森蚺/涟漪波/晒伤未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Signal 50','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Signal 50','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">森蚺 Anaconda</td>
+      <td class="cond" data-label="MP 多人条件">5 秒内 2 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">5 秒内 2 杀 ×25 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Signal 50','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">涟漪波 Ripplewave</td>
+      <td class="cond" data-label="MP 多人条件">20 瞬狙击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">30 瞬狙击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Signal 50','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">晒伤 Sunburn</td>
+      <td class="cond" data-label="MP 多人条件">40 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 一击必杀 <span class="warn">⚠️</span></td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Signal 50','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[森蚺] + 特殊[涟漪波] + 特殊[晒伤]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Signal 50','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">75 卧姿击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 卧姿击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Signal 50','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">75 一击必杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">150 一击必杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="手枪"><h2>手枪 <span class="cprog">0/28 · 0%</span></h2><details class="weapon" data-cat="手枪" data-name="SANG 9mm">
+    <summary class="whead">
+      <span class="wname">尚武9毫米机匣 SANG 9mm</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/秋/蛇皮/时空未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('SANG 9mm','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('SANG 9mm','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">秋 Autumn</td>
+      <td class="cond" data-label="MP 多人条件">25 开镜(ADS)击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 开镜(ADS)击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('SANG 9mm','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">蛇皮 Snakeskin</td>
+      <td class="cond" data-label="MP 多人条件">无伤 3 杀 ×5 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×15 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('SANG 9mm','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">时空 Space Time</td>
+      <td class="cond" data-label="MP 多人条件">50 双持击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 双持击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('SANG 9mm','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[秋] + 特殊[蛇皮] + 特殊[时空]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('SANG 9mm','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">20 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('SANG 9mm','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">40 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="手枪" data-name="Krait P68">
+    <summary class="whead">
+      <span class="wname">环蛇P68 Krait P68</span>
+      <span class="wlvl">解锁 Lv.7</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/离网/都市火烈鸟/烟幕未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Krait P68','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Krait P68','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">离网 Off Grid</td>
+      <td class="cond" data-label="MP 多人条件">15 悬檐击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 悬檐击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Krait P68','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">都市火烈鸟 Urban Flamingo</td>
+      <td class="cond" data-label="MP 多人条件">15 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Krait P68','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">烟幕 Smokescreen</td>
+      <td class="cond" data-label="MP 多人条件">50 消音器击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">125 消音器击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Krait P68','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[离网] + 特殊[都市火烈鸟] + 特殊[烟幕]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Krait P68','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">20 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Krait P68','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">40 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="手枪" data-name=".50 GS">
+    <summary class="whead">
+      <span class="wname">点50GS .50 GS</span>
+      <span class="wlvl">解锁 Lv.41</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/点50GS/泼溅/红虎未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('.50 GS','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('.50 GS','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">点50GS Frosted</td>
+      <td class="cond" data-label="MP 多人条件">20 爆头击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 爆头击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('.50 GS','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">泼溅 Splatter Ops</td>
+      <td class="cond" data-label="MP 多人条件">7 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">20 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('.50 GS','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">红虎 Red Tiger</td>
+      <td class="cond" data-label="MP 多人条件">30 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('.50 GS','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[点50GS] + 特殊[泼溅] + 特殊[红虎]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('.50 GS','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">20 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('.50 GS','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">40 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="手枪" data-name="Mojave .357">
+    <summary class="whead">
+      <span class="wname">莫哈韦点357 Mojave .357</span>
+      <span class="wlvl">解锁 Lv.48</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/迈阿密/壁纸/花环未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mojave .357','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mojave .357','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">迈阿密 Miami</td>
+      <td class="cond" data-label="MP 多人条件">15 一击必杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">50 一击必杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mojave .357','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">壁纸 Wallpaper</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×10 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×20 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mojave .357','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">花环 Garland</td>
+      <td class="cond" data-label="MP 多人条件">30 贴脸击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 贴脸击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mojave .357','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[迈阿密] + 特殊[壁纸] + 特殊[花环]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mojave .357','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">20 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('Mojave .357','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">40 腰射</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 腰射</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="发射器"><h2>发射器 <span class="cprog">0/28 · 0%</span></h2><details class="weapon" data-cat="发射器" data-name="PILA">
+    <summary class="whead">
+      <span class="wname">针式导弹 PILA</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/针式导弹/沙洗/数字坠落未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PILA','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PILA','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">针式导弹 Frontier</td>
+      <td class="cond" data-label="MP 多人条件">10 直击击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">25 直击击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PILA','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">沙洗 Sandwash</td>
+      <td class="cond" data-label="MP 多人条件">5 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 双杀 <span class="warn">⚠️</span></td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PILA','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">数字坠落 Digital Fall</td>
+      <td class="cond" data-label="MP 多人条件">摧毁 30 连杀/载具</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">摧毁 50 连杀/载具</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PILA','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 50 杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[针式导弹] + 特殊[沙洗] + 特殊[数字坠落]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PILA','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">无伤 2 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 2 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PILA','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">单局 10 杀 ×7</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 10 杀 ×15</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="发射器" data-name="RPG-8">
+    <summary class="whead">
+      <span class="wname">RPG-8</span>
+      <span class="wlvl">解锁 Lv.23</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/Digi Bark/石屑/泡泡糖未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('RPG-8','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('RPG-8','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">Digi Bark</td>
+      <td class="cond" data-label="MP 多人条件">10 趴下击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">25 趴下击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('RPG-8','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">石屑 Stone Bits</td>
+      <td class="cond" data-label="MP 多人条件">10 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">25 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('RPG-8','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">泡泡糖 Bubblegum Ops</td>
+      <td class="cond" data-label="MP 多人条件">摧毁 30 连杀/载具</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">摧毁 50 连杀/载具</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('RPG-8','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 50 杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[Digi Bark] + 特殊[石屑] + 特殊[泡泡糖]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('RPG-8','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">无伤 2 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 2 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('RPG-8','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">单局 10 杀 ×7</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 10 杀 ×15</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="发射器" data-name="JOKR">
+    <summary class="whead">
+      <span class="wname">标枪导弹 JOKR</span>
+      <span class="wlvl">解锁 Lv.43</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/标枪导弹/构造/蓝虎未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('JOKR','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('JOKR','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">标枪导弹 Thicket</td>
+      <td class="cond" data-label="MP 多人条件">5 双杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">15 双杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('JOKR','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">构造 Tectonic</td>
+      <td class="cond" data-label="MP 多人条件">10 远程击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">25 远程击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('JOKR','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">蓝虎 Blue Tiger</td>
+      <td class="cond" data-label="MP 多人条件">摧毁 30 连杀/载具</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">摧毁 50 连杀/载具</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('JOKR','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 50 杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[标枪导弹] + 特殊[构造] + 特殊[蓝虎]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('JOKR','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">无伤 2 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 2 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('JOKR','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">单局 10 杀 ×7</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 10 杀 ×15</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details><details class="weapon" data-cat="发射器" data-name="PM-40 Anvil">
+    <summary class="whead">
+      <span class="wname">PM-40铁砧 PM-40 Anvil</span>
+      <span class="wlvl">解锁 Lv.54</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/夜雪/递归/都市标准未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PM-40 Anvil','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PM-40 Anvil','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">夜雪 Night Snow</td>
+      <td class="cond" data-label="MP 多人条件">25 直击击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">25 直击击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PM-40 Anvil','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">递归 Recursive</td>
+      <td class="cond" data-label="MP 多人条件">不换弹 2 杀 ×5 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">不换弹 2 杀 ×20 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PM-40 Anvil','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">都市标准 Urban Standard</td>
+      <td class="cond" data-label="MP 多人条件">40 移动中击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 移动中击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PM-40 Anvil','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 50 杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[夜雪] + 特殊[递归] + 特殊[都市标准]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PM-40 Anvil','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">无伤 2 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 2 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('PM-40 Anvil','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">单局 10 杀 ×7</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 10 杀 ×15</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat" data-cat="冷兵器"><h2>冷兵器 <span class="cprog">0/7 · 0%</span></h2><details class="weapon" data-cat="冷兵器" data-name="FSS Carbon Edge 1095">
+    <summary class="whead">
+      <span class="wname">FSS碳钢刀锋1095 FSS Carbon Edge 1095</span>
+      <span class="wlvl">解锁 Lv.4</span>
+      <span class="wstage st-base">· 刷满级/特殊中（军事/栅格精简/囤积/临终未完）</span>
+      <span class="wmini"><i style="width:0%"></i></span>
+      <span class="wprog">0/7 · 0%</span>
+    </summary>
+    <table>
+      <thead><tr><th class="ck">✓</th><th>迷彩</th><th><span class="pill mp">MP</span> 多人条件</th><th><span class="pill dmz">DMZ</span> 僵尸条件</th><th>状态 / 前置</th></tr></thead>
+      <tbody><tr class="" data-r="M">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FSS Carbon Edge 1095','M')"></td>
+      <td class="camo tier-M" data-label="迷彩">军事迷彩(满级)</td>
+      <td class="cond" data-label="MP 多人条件">武器升到满级自动解锁 8 个军事迷彩</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">同左（满级即解锁）</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S1">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FSS Carbon Edge 1095','S1')"></td>
+      <td class="camo tier-S" data-label="迷彩">栅格精简 Raster Lite</td>
+      <td class="cond" data-label="MP 多人条件">25 跳跃击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">100 跳跃击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S2">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FSS Carbon Edge 1095','S2')"></td>
+      <td class="camo tier-S" data-label="迷彩">囤积 Stockpile</td>
+      <td class="cond" data-label="MP 多人条件">25 重型近战处决</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 重型近战处决</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-special" data-r="S3">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FSS Carbon Edge 1095','S3')"></td>
+      <td class="camo tier-S" data-label="迷彩">临终 Deathbed</td>
+      <td class="cond" data-label="MP 多人条件">5 秒内 2 杀 ×25 次</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">5 秒内 2 杀 ×50 次</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip avail">● 可刷</span></td>
+    </tr><tr class="row-comp locked" data-r="G">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FSS Carbon Edge 1095','G')"></td>
+      <td class="camo tier-G" data-label="迷彩">金 Gold</td>
+      <td class="cond" data-label="MP 多人条件">单局 15 杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">单局 100 歼灭</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成：军事迷彩 + 特殊[栅格精简] + 特殊[囤积] + 特殊[临终]</span></td>
+    </tr><tr class="row-comp locked" data-r="P">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FSS Carbon Edge 1095','P')"></td>
+      <td class="camo tier-P" data-label="迷彩">铂金 Platinum</td>
+      <td class="cond" data-label="MP 多人条件">无伤 3 杀 ×15</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">无伤 3 杀 ×50</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「金」</span></td>
+    </tr><tr class="row-comp locked" data-r="H">
+      <td class="ck" data-label="完成"><input type="checkbox" onchange="toggle('FSS Carbon Edge 1095','H')"></td>
+      <td class="camo tier-H" data-label="迷彩">谐波破碎 Harmonic Break</td>
+      <td class="cond" data-label="MP 多人条件">25 背后击杀</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">75 背后击杀</td>
+      <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
+    </tr></tbody></table>
+    <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
+  </details></div><div class="cat"><h2>全局大师迷彩 Mastery（非每把枪）</h2>
+    <div class="whint" style="margin-bottom:10px">分歧(Divergence)解锁后开启 —— 当前谐波破碎进度 <b>0/33</b> （未解锁）</div>
+    <div class="mastery"><div class="mlist"><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Mercurial Drift')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Mercurial Drift</span><br><span class="md">[多人 MP] 单局 10 杀 ×250 次</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Polyatomic Reforged')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Polyatomic Reforged</span><br><span class="md">[多人 MP] 无伤 3 杀连击 ×300 次</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Orion Reforged')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Orion Reforged</span><br><span class="md">[多人 MP] 不死 5 杀 ×500 次（终极大师）</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Chiral')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Chiral</span><br><span class="md">[僵尸/DMZ] Tier 3+ 敌人击杀 2,500</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Ripple Tide')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Ripple Tide</span><br><span class="md">[僵尸/DMZ] 单次部署带 2 个中尉狗牌撤离 ×50</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Helio')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Helio</span><br><span class="md">[僵尸/DMZ] 满级特工用传说武器击杀（⚠️ 数值冲突：2.5万 / 25万，以游戏内为准）</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Parallax')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Parallax</span><br><span class="md">[战区 Warzone（第1赛季）] 挑战要求官方未公布</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Damascus Reforged')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Damascus Reforged</span><br><span class="md">[战区 Warzone（第1赛季）] 挑战要求官方未公布</span></span>
+        </label></div><div class="mcard ">
+        <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" onchange="toggle('MASTERY','Empyros')" style="margin-top:3px;accent-color:var(--ok)">
+          <span><span class="mt">Empyros</span><br><span class="md">[战区 Warzone（第1赛季）] 挑战要求官方未公布</span></span>
+        </label></div></div></div></div></main>
 <footer>
   数据来源：GameRant / Maxbit Games MW4 迷彩攻略（2026-10 首发版本）。标 <span class="warn">⚠️</span> 处为攻略原文缺失或前后矛盾，请以游戏内实际数值为准。
   分歧(Divergence)在完成全游戏 33 个谐波破碎(Harmonic Break)后自动解锁，无专属挑战，故不列为每把枪勾选项。大师迷彩(Mastery)分 MP / DMZ / 战区三条独立线，分歧解锁后开启。
@@ -624,6 +2458,17 @@ function buildFilters(){
 
 /* 事件 */
 document.getElementById("search").addEventListener("input",applyFilter);
+/* 移动端：操作菜单折叠/展开 */
+(function(){
+  const mt=document.getElementById("menuToggle");
+  const panel=document.getElementById("ctrlpanel");
+  if(!mt||!panel) return;
+  mt.addEventListener("click",()=>{
+    const open=panel.classList.toggle("open");
+    mt.textContent=open?"收起 ▴":"展开 ▾";
+    mt.setAttribute("aria-expanded",open?"true":"false");
+  });
+})();
 document.getElementById("expandAll").onclick=()=>document.querySelectorAll("details.weapon").forEach(d=>d.open=true);
 document.getElementById("collapseAll").onclick=()=>document.querySelectorAll("details.weapon").forEach(d=>d.open=false);
 document.getElementById("resetBtn").onclick=()=>{
@@ -647,5 +2492,6 @@ document.getElementById("importFile").onchange=e=>{
 buildFilters();
 render();
 </script>
-</body>
-</html>
+
+
+</body></html>
