@@ -105,6 +105,48 @@
   .nchip{font-size:12px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 11px;cursor:pointer}
   .nchip:hover{border-color:var(--accent)}
   .nsnone{font-size:12px;color:var(--sub);opacity:.6}
+
+  /* ===== 移动端适配 ===== */
+  @media (max-width: 760px){
+    body{font-size:13px}
+    header{padding:12px 12px}
+    h1{font-size:15px;line-height:1.35}
+    .sub{font-size:11px;margin-bottom:8px}
+    .controls{gap:6px}
+    input[type=text]{min-width:0;width:100%;flex:1 1 100%}
+    .controls button{flex:1 1 auto;padding:8px 10px;font-size:13px}
+    .filters{margin-top:8px}
+    .filters button{padding:7px 9px;font-size:12px}
+    main{padding:12px}
+    .gstat{min-width:0;flex:1 1 44%;padding:10px 8px}
+    .gnum{font-size:22px}
+    /* 武器表头：窄屏隐藏迷你进度条，避免拥挤 */
+    .whead{position:relative;padding:10px 12px;gap:8px}
+    .whead .wmini{display:none}
+    .whead .wname{font-size:14px;flex:1 1 auto;min-width:0}
+    .whead .wstage{order:2;margin-left:0}
+    .whead .wlvl{order:3}
+    .whead .wprog{order:4;margin-left:auto}
+    /* 表格 → 堆叠卡片（每行一张） */
+    .weapon table,.weapon thead,.weapon tbody,.weapon tr,.weapon td{display:block;width:auto}
+    .weapon thead{display:none}
+    .weapon tr{border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:2px 2px;background:var(--panel2)}
+    .weapon td{border:none;padding:7px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;line-height:1.45}
+    .weapon td::before{content:attr(data-label);color:var(--sub);font-size:11px;font-weight:600;flex:0 0 auto;text-align:left;padding-top:1px}
+    .weapon td.ck{justify-content:flex-start;gap:10px}
+    .weapon td.ck input{width:22px;height:22px;flex:0 0 auto;accent-color:var(--ok)}
+    .weapon td.status{min-width:0}
+    .weapon td.camo{font-size:14px}
+    .weapon td.cond{font-size:12px}
+    .mastery .mlist{grid-template-columns:1fr}
+    .legend{font-size:10px;gap:8px;margin-top:6px}
+    .memnote{margin-left:0;flex:1 1 100%;margin-top:4px}
+  }
+  @media (max-width: 380px){
+    .gstat{flex:1 1 100%}
+    .whead .wname{font-size:13px}
+    .whead .wprog{font-size:11px}
+  }
 </style>
 </head>
 <body>
@@ -420,11 +462,11 @@ function buildWeapon(w){
     else if(s.status==="locked") rc += " locked";
     const dmzWarn = r.dmzWarn ? ' <span class="warn">⚠️</span>' : '';
     html += `<tr class="${rc.trim()}" data-r="${r.id}">
-      <td class="ck"><input type="checkbox" ${d?'checked':''} onchange="toggle('${w.name}','${r.id}')"></td>
-      <td class="camo tier-${r.tier}">${r.label}</td>
-      <td class="cond">${r.mp}</td>
-      <td class="cond dmz">${r.dmz}${dmzWarn}</td>
-      <td class="status">${statusChip(s)}</td>
+      <td class="ck" data-label="完成"><input type="checkbox" ${d?'checked':''} onchange="toggle('${w.name}','${r.id}')"></td>
+      <td class="camo tier-${r.tier}" data-label="迷彩">${r.label}</td>
+      <td class="cond" data-label="MP 多人条件">${r.mp}</td>
+      <td class="cond dmz" data-label="DMZ 僵尸条件">${r.dmz}${dmzWarn}</td>
+      <td class="status" data-label="状态 / 前置">${statusChip(s)}</td>
     </tr>`;
   });
   html += `</tbody></table>
