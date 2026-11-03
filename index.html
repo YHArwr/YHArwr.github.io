@@ -85,6 +85,33 @@
   .saved.show{opacity:1}
   .memnote{font-size:11px;color:var(--sub);margin-left:auto;align-self:center}
   .memnote b{color:var(--accent2)}
+  .searchtip{display:none;color:var(--warn);font-size:13px;padding:14px 18px;background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:0 18px 14px}
+
+  /* ===== AI 分析悬浮窗 ===== */
+  #aibtn{position:fixed;right:16px;bottom:16px;z-index:40;background:var(--accent);color:#1a1008;border:none;font-weight:700;padding:12px 16px;border-radius:30px;box-shadow:0 4px 16px rgba(0,0,0,.45);cursor:pointer;font-size:14px}
+  #aibtn:active{transform:scale(.97)}
+  #aipanel{position:fixed;right:16px;bottom:72px;z-index:41;width:380px;max-width:calc(100vw - 24px);max-height:72vh;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.55);display:none;flex-direction:column;overflow:hidden}
+  #aipanel.open{display:flex}
+  #aipanel .aihead{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--panel2);font-weight:600}
+  #aipanel .aihead .x{margin-left:auto;cursor:pointer;color:var(--sub);font-size:20px;line-height:1;padding:0 4px}
+  #aipanel .aihead .x:hover{color:var(--txt)}
+  #aipanel .aibody{padding:12px 14px;overflow:auto;font-size:13px;line-height:1.6}
+  #aipanel .aibody pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;margin:0;color:var(--txt)}
+  #aipanel .aiset{border-top:1px solid var(--line);padding:10px 14px;background:rgba(255,255,255,.02)}
+  #aipanel .aiset label{display:block;font-size:11px;color:var(--sub);margin:6px 0 3px}
+  #aipanel .aiset input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:6px 8px;font-size:12px;box-sizing:border-box}
+  #aipanel .aifoot{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px}
+  #aipanel button.aiact{flex:1;background:var(--accent);color:#1a1008;border:none;font-weight:600;padding:9px;border-radius:6px;cursor:pointer;font-size:13px}
+  #aipanel button.aiact.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  .ainote{font-size:11px;color:var(--sub);margin-top:8px;line-height:1.45}
+  .aierr{color:var(--warn);font-size:12px;margin-top:8px}
+  .aistatus{padding:8px 14px;font-size:12px;border-bottom:1px solid var(--line);line-height:1.4}
+  .aistatus.ok{color:var(--ok)}
+  .aistatus.warn{color:var(--warn)}
+  @media (max-width:760px){
+    #aipanel{right:8px;left:8px;width:auto;bottom:66px;max-height:74vh}
+    #aibtn{right:10px;bottom:10px;padding:10px 14px}
+  }
 
   /* 全局统计 */
   #globalstats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
@@ -166,7 +193,8 @@
       <input type="text" id="search" placeholder="搜索武器名 / 迷彩名…">
       <button id="expandAll">展开全部</button>
       <button id="collapseAll">收起全部</button>
-      <button id="exportBtn">导出进度</button>
+      <button id="exportXlsx">导出 Excel</button>
+      <button id="exportBtn">导出备份</button>
       <button id="importBtn">导入进度</button>
       <button id="resetBtn">清空全部</button>
       <input type="file" id="importFile" accept=".json" style="display:none">
@@ -186,7 +214,7 @@
    <div class="gstat"><div class="gnum">0<span>/33</span></div><div class="glabel">铂金 Platinum</div></div>
    <div class="gstat"><div class="gnum">0<span>/33</span></div><div class="glabel">谐波破碎 HB</div></div>
    <div class="gstat "><div class="gnum">⏳<span>0/33</span></div><div class="glabel">分歧 Divergence（自动）</div></div></div>
-    <div id="nextsteps"><div class="nst">下一步：前置已满足、但还没刷的武器（按可刷档位分组，点名字可定位）</div><div class="nsblock"><div class="nshead">🟡 可刷「金」(本武器军事+3特殊已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div><div class="nsblock"><div class="nshead">🟣 可刷「铂金」(本武器金+同类全金已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div><div class="nsblock"><div class="nshead">🟢 可刷「谐波破碎」(本武器铂金+全游戏33铂金已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div></div><div class="cat" data-cat="突击步枪"><h2>突击步枪 <span class="cprog">0/56 · 0%</span></h2><details class="weapon" data-cat="突击步枪" data-name="Han 86">
+    <div id="nextsteps"><div class="nst">下一步：前置已满足、但还没刷的武器（按可刷档位分组，点名字可定位）</div><div class="nsblock"><div class="nshead">🟡 可刷「金」(本武器军事+3特殊已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div><div class="nsblock"><div class="nshead">🟣 可刷「铂金」(本武器金+同类全金已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div><div class="nsblock"><div class="nshead">🟢 可刷「谐波破碎」(本武器铂金+全游戏33铂金已完) <b>0</b></div><div class="nsbody"><span class="nsnone">— 暂无</span></div></div></div><div class="cat" data-cat="突击步枪"><h2>突击步枪 <span class="cprog">0/56 · 0%</span></h2><details class="weapon" data-cat="突击步枪" data-name="Han 86" data-search="汉86 han 86 烟雾 smoke 风暴波 stormwave 红 red">
     <summary class="whead">
       <span class="wname">汉86 Han 86</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -240,7 +268,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="突击步枪" data-name="M4">
+  </details><details class="weapon" data-cat="突击步枪" data-name="M4" data-search="m4 myriad 夜战 night ops 绿 green">
     <summary class="whead">
       <span class="wname">M4</span>
       <span class="wlvl">解锁 Lv.14</span>
@@ -294,7 +322,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="突击步枪" data-name="Hyeon Burst">
+  </details><details class="weapon" data-cat="突击步枪" data-name="Hyeon Burst" data-search="玄铁(点射型) hyeon burst 黄松 ponderosa 红雨 red rain 小猫混乱 kitty kaos">
     <summary class="whead">
       <span class="wname">玄铁(点射型) Hyeon Burst</span>
       <span class="wlvl">解锁 Lv.21</span>
@@ -348,7 +376,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="突击步枪" data-name="Patriot XMR">
+  </details><details class="weapon" data-cat="突击步枪" data-name="Patriot XMR" data-search="爱国者xmr patriot xmr 沙丘海 dune sea 焦痕 scorch 消散 disperse">
     <summary class="whead">
       <span class="wname">爱国者XMR Patriot XMR</span>
       <span class="wlvl">解锁 Lv.27</span>
@@ -402,7 +430,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="突击步枪" data-name="Kastov 762">
+  </details><details class="weapon" data-cat="突击步枪" data-name="Kastov 762" data-search="卡斯托夫762 kastov 762 萨姆尼姆 samnim 栅格辅助 raster aux 黄 yellow">
     <summary class="whead">
       <span class="wname">卡斯托夫762 Kastov 762</span>
       <span class="wlvl">解锁 Lv.34</span>
@@ -456,7 +484,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="突击步枪" data-name="Oden">
+  </details><details class="weapon" data-cat="突击步枪" data-name="Oden" data-search="欧登 oden 暗苔 dark moss 页岩 shale 热杆 hot rod">
     <summary class="whead">
       <span class="wname">欧登 Oden</span>
       <span class="wlvl">解锁 Lv.39</span>
@@ -510,7 +538,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="突击步枪" data-name="Axion">
+  </details><details class="weapon" data-cat="突击步枪" data-name="Axion" data-search="阿克西恩 axion 碎石 splinter rock 热带落日 sunset tropic 青 cyan">
     <summary class="whead">
       <span class="wname">阿克西恩 Axion</span>
       <span class="wlvl">解锁 Lv.52</span>
@@ -564,7 +592,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="突击步枪" data-name="Cronen Squall">
+  </details><details class="weapon" data-cat="突击步枪" data-name="Cronen Squall" data-search="克洛南烈风 cronen squall 鬼 oni 都市烟雾 urban smoke 光学混响 optical reverb">
     <summary class="whead">
       <span class="wname">克洛南烈风 Cronen Squall</span>
       <span class="wlvl">解锁 Lv.55</span>
@@ -618,7 +646,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="微型冲锋枪"><h2>微型冲锋枪 <span class="cprog">0/35 · 0%</span></h2><details class="weapon" data-cat="微型冲锋枪" data-name="ISO Nightshade">
+  </details></div><div class="cat" data-cat="微型冲锋枪"><h2>微型冲锋枪 <span class="cprog">0/35 · 0%</span></h2><details class="weapon" data-cat="微型冲锋枪" data-name="ISO Nightshade" data-search="iso夜影 iso nightshade 沥青 asphalt 黑色地形 black topo 棕 brown">
     <summary class="whead">
       <span class="wname">ISO夜影 ISO Nightshade</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -672,7 +700,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="微型冲锋枪" data-name="VEL 46">
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="VEL 46" data-search="威尔46 vel 46 威尔46 jungle shadow 苍白 ghast 枪械金属 gunmetal">
     <summary class="whead">
       <span class="wname">威尔46 VEL 46</span>
       <span class="wlvl">解锁 Lv.5</span>
@@ -726,7 +754,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="微型冲锋枪" data-name="Wz.55 Striga">
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="Wz.55 Striga" data-search="wz55斯崔加 wz.55 striga 星芒 stellation 响尾蛇 rattlesnake 暗棕 dark tan">
     <summary class="whead">
       <span class="wname">Wz55斯崔加 Wz.55 Striga</span>
       <span class="wlvl">解锁 Lv.18</span>
@@ -780,7 +808,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="微型冲锋枪" data-name="PPSh-41">
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="PPSh-41" data-search="ppsh-41 黑井 blackwell 铁 iron 水流 currents">
     <summary class="whead">
       <span class="wname">PPSh-41</span>
       <span class="wlvl">解锁 Lv.30</span>
@@ -834,7 +862,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="微型冲锋枪" data-name="X-58 Nyx">
+  </details><details class="weapon" data-cat="微型冲锋枪" data-name="X-58 Nyx" data-search="x-58夜神 x-58 nyx 狙击面纱 sniper veil 碳化 carbonated 青柠 lime">
     <summary class="whead">
       <span class="wname">X-58夜神 X-58 Nyx</span>
       <span class="wlvl">解锁 Lv.46</span>
@@ -888,7 +916,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="霰弹枪"><h2>霰弹枪 <span class="cprog">0/14 · 0%</span></h2><details class="weapon" data-cat="霰弹枪" data-name="Rezi 12">
+  </details></div><div class="cat" data-cat="霰弹枪"><h2>霰弹枪 <span class="cprog">0/14 · 0%</span></h2><details class="weapon" data-cat="霰弹枪" data-name="Rezi 12" data-search="雷兹12 rezi 12 原油 struck oil 笔触 brush stroke 白松 white pine">
     <summary class="whead">
       <span class="wname">雷兹12 Rezi 12</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -942,7 +970,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="霰弹枪" data-name="Warlord">
+  </details><details class="weapon" data-cat="霰弹枪" data-name="Warlord" data-search="战将 warlord 红移 redshift 腐化黏土 corrupted clay 岩浆怒 magma ire">
     <summary class="whead">
       <span class="wname">战将 Warlord</span>
       <span class="wlvl">解锁 Lv.32</span>
@@ -996,7 +1024,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="轻机枪"><h2>轻机枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="轻机枪" data-name="FiNN LMG">
+  </details></div><div class="cat" data-cat="轻机枪"><h2>轻机枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="轻机枪" data-name="FiNN LMG" data-search="菲恩轻机枪 finn lmg 沙漠战术 desert tactics 雷暴 thunderhead 绿虎 green tiger">
     <summary class="whead">
       <span class="wname">菲恩轻机枪 FiNN LMG</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -1050,7 +1078,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="轻机枪" data-name="Type 73">
+  </details><details class="weapon" data-cat="轻机枪" data-name="Type 73" data-search="73式 type 73 露头 outcrop 狐踪 foxtrail 灰松 ash pine">
     <summary class="whead">
       <span class="wname">73式 Type 73</span>
       <span class="wlvl">解锁 Lv.9</span>
@@ -1104,7 +1132,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="轻机枪" data-name="APOC-338">
+  </details><details class="weapon" data-cat="轻机枪" data-name="APOC-338" data-search="apoc 338 apoc-338 幻影流 phantom flux 矿物 mineral 虎爪 tiger swipe">
     <summary class="whead">
       <span class="wname">APOC 338 APOC-338</span>
       <span class="wlvl">解锁 Lv.44</span>
@@ -1158,7 +1186,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="精确射手步枪"><h2>精确射手步枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="精确射手步枪" data-name="MAR-9">
+  </details></div><div class="cat" data-cat="精确射手步枪"><h2>精确射手步枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="精确射手步枪" data-name="MAR-9" data-search="mar-9 红树 mangrove 真菌网格 fungal grid 白 white">
     <summary class="whead">
       <span class="wname">MAR-9</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -1212,7 +1240,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="精确射手步枪" data-name="Oris 8.6">
+  </details><details class="weapon" data-cat="精确射手步枪" data-name="Oris 8.6" data-search="奥里斯8.6 oris 8.6 木槿 hibiscus 火焰地形 fire topo 深空 deep space">
     <summary class="whead">
       <span class="wname">奥里斯8.6 Oris 8.6</span>
       <span class="wlvl">解锁 Lv.11</span>
@@ -1266,7 +1294,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="精确射手步枪" data-name="Mosin-Nagant">
+  </details><details class="weapon" data-cat="精确射手步枪" data-name="Mosin-Nagant" data-search="莫辛-纳甘 mosin-nagant 冰崖 ice sheer 分形雪 fractal snow 贴纸冲击 sticker shock">
     <summary class="whead">
       <span class="wname">莫辛-纳甘 Mosin-Nagant</span>
       <span class="wlvl">解锁 Lv.36</span>
@@ -1320,7 +1348,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="狙击步枪"><h2>狙击步枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="狙击步枪" data-name="KG-7 Vulcan">
+  </details></div><div class="cat" data-cat="狙击步枪"><h2>狙击步枪 <span class="cprog">0/21 · 0%</span></h2><details class="weapon" data-cat="狙击步枪" data-name="KG-7 Vulcan" data-search="kg-7火神 kg-7 vulcan 树线 treeline 蛛丝 spidersilk 张力 tension">
     <summary class="whead">
       <span class="wname">KG-7火神 KG-7 Vulcan</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -1374,7 +1402,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="狙击步枪" data-name="Astaroth .57">
+  </details><details class="weapon" data-cat="狙击步枪" data-name="Astaroth .57" data-search="点57阿塔罗斯 astaroth .57 干笔 dry brush 荒野 backcountry 恐怖瘟疫 dread plague">
     <summary class="whead">
       <span class="wname">点57阿塔罗斯 Astaroth .57</span>
       <span class="wlvl">解锁 Lv.25</span>
@@ -1428,7 +1456,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="狙击步枪" data-name="Signal 50">
+  </details><details class="weapon" data-cat="狙击步枪" data-name="Signal 50" data-search="西格诺50 signal 50 森蚺 anaconda 涟漪波 ripplewave 晒伤 sunburn">
     <summary class="whead">
       <span class="wname">西格诺50 Signal 50</span>
       <span class="wlvl">解锁 Lv.50</span>
@@ -1482,7 +1510,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="手枪"><h2>手枪 <span class="cprog">0/28 · 0%</span></h2><details class="weapon" data-cat="手枪" data-name="SANG 9mm">
+  </details></div><div class="cat" data-cat="手枪"><h2>手枪 <span class="cprog">0/28 · 0%</span></h2><details class="weapon" data-cat="手枪" data-name="SANG 9mm" data-search="尚武9毫米机匣 sang 9mm 秋 autumn 蛇皮 snakeskin 时空 space time">
     <summary class="whead">
       <span class="wname">尚武9毫米机匣 SANG 9mm</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -1536,7 +1564,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="手枪" data-name="Krait P68">
+  </details><details class="weapon" data-cat="手枪" data-name="Krait P68" data-search="环蛇p68 krait p68 离网 off grid 都市火烈鸟 urban flamingo 烟幕 smokescreen">
     <summary class="whead">
       <span class="wname">环蛇P68 Krait P68</span>
       <span class="wlvl">解锁 Lv.7</span>
@@ -1590,7 +1618,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="手枪" data-name=".50 GS">
+  </details><details class="weapon" data-cat="手枪" data-name=".50 GS" data-search="点50gs .50 gs 点50gs frosted 泼溅 splatter ops 红虎 red tiger">
     <summary class="whead">
       <span class="wname">点50GS .50 GS</span>
       <span class="wlvl">解锁 Lv.41</span>
@@ -1644,7 +1672,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="手枪" data-name="Mojave .357">
+  </details><details class="weapon" data-cat="手枪" data-name="Mojave .357" data-search="莫哈韦点357 mojave .357 迈阿密 miami 壁纸 wallpaper 花环 garland">
     <summary class="whead">
       <span class="wname">莫哈韦点357 Mojave .357</span>
       <span class="wlvl">解锁 Lv.48</span>
@@ -1698,7 +1726,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="发射器"><h2>发射器 <span class="cprog">0/28 · 0%</span></h2><details class="weapon" data-cat="发射器" data-name="PILA">
+  </details></div><div class="cat" data-cat="发射器"><h2>发射器 <span class="cprog">0/28 · 0%</span></h2><details class="weapon" data-cat="发射器" data-name="PILA" data-search="针式导弹 pila 针式导弹 frontier 沙洗 sandwash 数字坠落 digital fall">
     <summary class="whead">
       <span class="wname">针式导弹 PILA</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -1752,7 +1780,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="发射器" data-name="RPG-8">
+  </details><details class="weapon" data-cat="发射器" data-name="RPG-8" data-search="rpg-8 digi bark 石屑 stone bits 泡泡糖 bubblegum ops">
     <summary class="whead">
       <span class="wname">RPG-8</span>
       <span class="wlvl">解锁 Lv.23</span>
@@ -1806,7 +1834,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="发射器" data-name="JOKR">
+  </details><details class="weapon" data-cat="发射器" data-name="JOKR" data-search="标枪导弹 jokr 标枪导弹 thicket 构造 tectonic 蓝虎 blue tiger">
     <summary class="whead">
       <span class="wname">标枪导弹 JOKR</span>
       <span class="wlvl">解锁 Lv.43</span>
@@ -1860,7 +1888,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details><details class="weapon" data-cat="发射器" data-name="PM-40 Anvil">
+  </details><details class="weapon" data-cat="发射器" data-name="PM-40 Anvil" data-search="pm-40铁砧 pm-40 anvil 夜雪 night snow 递归 recursive 都市标准 urban standard">
     <summary class="whead">
       <span class="wname">PM-40铁砧 PM-40 Anvil</span>
       <span class="wlvl">解锁 Lv.54</span>
@@ -1914,7 +1942,7 @@
       <td class="status" data-label="状态 / 前置"><span class="chip lock">🔒 锁定</span> <span class="reason">需先完成本武器「铂金」</span></td>
     </tr></tbody></table>
     <div class="whint">本武器阶梯：军事/特殊 → <b>金</b>(需本武器军事+3特殊) → <b>铂金</b>(需同类全部金) → <b>谐波破碎</b>(需全游戏33铂金) → 全局<b>分歧</b>(需33谐波破碎自动解锁)</div>
-  </details></div><div class="cat" data-cat="冷兵器"><h2>冷兵器 <span class="cprog">0/7 · 0%</span></h2><details class="weapon" data-cat="冷兵器" data-name="FSS Carbon Edge 1095">
+  </details></div><div class="cat" data-cat="冷兵器"><h2>冷兵器 <span class="cprog">0/7 · 0%</span></h2><details class="weapon" data-cat="冷兵器" data-name="FSS Carbon Edge 1095" data-search="fss碳钢刀锋1095 fss carbon edge 1095 栅格精简 raster lite 囤积 stockpile 临终 deathbed">
     <summary class="whead">
       <span class="wname">FSS碳钢刀锋1095 FSS Carbon Edge 1095</span>
       <span class="wlvl">解锁 Lv.4</span>
@@ -2011,6 +2039,29 @@
   数据来源：GameRant / Maxbit Games MW4 迷彩攻略（2026-10 首发版本）。标 <span class="warn">⚠️</span> 处为攻略原文缺失或前后矛盾，请以游戏内实际数值为准。
   分歧(Divergence)在完成全游戏 33 个谐波破碎(Harmonic Break)后自动解锁，无专属挑战，故不列为每把枪勾选项。大师迷彩(Mastery)分 MP / DMZ / 战区三条独立线，分歧解锁后开启。
 </footer>
+
+<button id="aibtn" type="button">🤖 AI 分析进度</button>
+<div id="aipanel">
+  <div class="aihead">🤖 进度分析（AI）<span class="x" id="aiclose" title="收起">×</span></div>
+  <div class="aistatus warn" id="aistatus">⚠ 未配置共享 AI：站长需部署代理并填 PROXY_ENDPOINT；否则请自行填 key</div>
+  <div class="aibody"><pre id="aiout">点下方「分析我的进度」，会读取你当前的勾选情况，交给 AI 分析并给出下一步建议。
+
+· 若站长已接入共享 AI：免 key，直接点分析即可。
+· 若未接入：在下方填写你自己的 API Key / 接口地址 / 模型名（仅存本浏览器，不外传）。</pre></div>
+  <div class="aiset">
+    <label>① 用自己的 key（可选，留空则用站长共享 AI）</label>
+    <input type="password" id="aiKey" placeholder="sk-..." autocomplete="off">
+    <label>接口地址（OpenAI 兼容，自动拼 /chat/completions）</label>
+    <input type="text" id="aiBase" placeholder="https://api.deepseek.com/v1">
+    <label>模型名</label>
+    <input type="text" id="aiModel" placeholder="deepseek-chat">
+    <div class="ainote">用自己的 key 时，若提示跨域(CORS)失败，说明该接口不允许网页直连——可改用支持 CORS 的接口（DeepSeek/Moonshot），或让站长部署代理。</div>
+  </div>
+  <div class="aifoot">
+    <button class="aiact" id="aiRun">分析我的进度</button>
+    <button class="aiact sec" id="aiSave">保存设置</button>
+  </div>
+</div>
 
 <script>
 /* ===== 数据：33 把首发武器 ===== */
@@ -2285,7 +2336,11 @@ function buildWeapon(w){
   const pct = Math.round(done/total*100);
   const st = weaponStage(w);
 
-  let html = `<details class="weapon" data-cat="${w.cat}" data-name="${w.name}">
+  // 可搜索串：中文名 + 英文名 + 全部迷彩的中文/英文名（用于搜索框匹配，修中文搜不到的 bug）
+  const searchAttr = ((w.cn?w.cn+" ":"")+w.name+" "+w.s.map(c=>(c.cn?c.cn+" ":"")+c.n).join(" "))
+    .toLowerCase().replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+
+  let html = `<details class="weapon" data-cat="${w.cat}" data-name="${w.name}" data-search="${searchAttr}">
     <summary class="whead">
       <span class="wname">${dispName(w)}</span>
       <span class="wlvl">解锁 Lv.${w.lvl}</span>
@@ -2450,12 +2505,20 @@ function applyFilter(){
   const active = document.querySelector(".filters button.active");
   const catf = active ? active.dataset.cat : "全部";
   document.querySelectorAll("details.weapon").forEach(det=>{
-    const name = det.dataset.name.toLowerCase();
     const cat = det.dataset.cat;
     const matchCat = (catf==="全部"||cat===catf);
-    const matchQ = (!q || name.includes(q));
+    const hay = (det.dataset.search||det.dataset.name||"").toLowerCase();
+    const matchQ = (!q || hay.includes(q));
     det.style.display = (matchCat&&matchQ) ? "" : "none";
   });
+  // 没有命中时给个提示
+  const anyShown = [...document.querySelectorAll("details.weapon")].some(d=>d.style.display!=="none");
+  let tip = document.getElementById("searchTip");
+  if(q && !anyShown){
+    if(!tip){ tip=document.createElement("div"); tip.id="searchTip"; tip.className="searchtip"; main.parentNode.insertBefore(tip, main); }
+    tip.textContent = `未找到与「${q}」匹配的武器/迷彩`;
+    tip.style.display="";
+  } else if(tip){ tip.style.display="none"; }
 }
 
 function buildFilters(){
@@ -2494,6 +2557,206 @@ document.getElementById("exportBtn").onclick=()=>{
   a.download="mw4-camo-progress.json"; a.click();
 };
 document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("exportXlsx").onclick=exportXlsx;
+
+/* ===== 导出真实 Excel (.xlsx) ===== */
+function xesc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function colRef(i){ let s=""; i++; while(i>0){ const r=(i-1)%26; s=String.fromCharCode(65+r)+s; i=Math.floor((i-1)/26); } return s; }
+function crc32(buf){
+  let table=crc32.table;
+  if(!table){ table=crc32.table=[]; for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); table[n]=c>>>0; } }
+  let crc=0xFFFFFFFF;
+  for(let i=0;i<buf.length;i++) crc=table[(crc^buf[i])&0xFF]^(crc>>>8);
+  return (crc^0xFFFFFFFF)>>>0;
+}
+// 用「存储(不压缩)」方式打一个最小可用的 xlsx zip 包（无需任何第三方库，离线可用）
+function makeXlsx(files){
+  const enc=new TextEncoder();
+  const parts=[], central=[]; let offset=0;
+  const dosDate=0x21; // 1980-01-01
+  files.forEach(f=>{
+    const nameBytes=enc.encode(f.name);
+    const data=(f.data instanceof Uint8Array)?f.data:enc.encode(f.data);
+    const crc=crc32(data), size=data.length;
+    const lh=new Uint8Array(30+nameBytes.length); const dv=new DataView(lh.buffer);
+    dv.setUint32(0,0x04034b50,true); dv.setUint16(4,20,true); dv.setUint16(6,0,true); dv.setUint16(8,0,true);
+    dv.setUint16(10,0,true); dv.setUint16(12,dosDate,true);
+    dv.setUint32(14,crc,true); dv.setUint32(18,size,true); dv.setUint32(22,size,true);
+    dv.setUint16(26,nameBytes.length,true); dv.setUint16(28,0,true);
+    lh.set(nameBytes,30); parts.push(lh,data);
+    const ch=new Uint8Array(46+nameBytes.length); const cdv=new DataView(ch.buffer);
+    cdv.setUint32(0,0x02014b50,true); cdv.setUint16(4,20,true); cdv.setUint16(6,20,true); cdv.setUint16(8,0,true);
+    cdv.setUint16(10,0,true); cdv.setUint16(12,0,true); cdv.setUint16(14,dosDate,true);
+    cdv.setUint32(16,crc,true); cdv.setUint32(20,size,true); cdv.setUint32(24,size,true);
+    cdv.setUint16(28,nameBytes.length,true); cdv.setUint16(30,0,true); cdv.setUint16(32,0,true);
+    cdv.setUint16(34,0,true); cdv.setUint16(36,0,true); cdv.setUint32(38,0,true); cdv.setUint32(42,offset,true);
+    ch.set(nameBytes,46); central.push(ch);
+    offset+=lh.length+data.length;
+  });
+  const eocd=new Uint8Array(22); const edv=new DataView(eocd.buffer);
+  edv.setUint32(0,0x06054b50,true); edv.setUint16(4,0,true); edv.setUint16(6,0,true);
+  edv.setUint16(8,files.length,true); edv.setUint16(10,files.length,true);
+  let cdSize=0; central.forEach(c=>cdSize+=c.length);
+  edv.setUint32(12,cdSize,true); edv.setUint32(16,offset,true); edv.setUint16(20,0,true);
+  const all=[...parts,...central,eocd]; let total=0; all.forEach(a=>total+=a.length);
+  const out=new Uint8Array(total); let p=0; all.forEach(a=>{ out.set(a,p); p+=a.length; });
+  return out;
+}
+function buildSheet(rows){
+  let xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  xml+='<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+  rows.forEach((r,ri)=>{
+    xml+='<row r="'+(ri+1)+'">';
+    r.forEach((cell,ci)=>{
+      const ref=colRef(ci)+(ri+1);
+      if(cell.num) xml+='<c r="'+ref+'" t="n"><v>'+cell.v+'</v></c>';
+      else xml+='<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+xesc(cell.v)+'</t></is></c>';
+    });
+    xml+='</row>';
+  });
+  xml+='</sheetData></worksheet>'; return xml;
+}
+function cTypes(){ return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>'; }
+function rootRels(){ return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'; }
+function workbookXml(){ return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="迷彩进度" sheetId="1" r:id="rId1"/></sheets></workbook>'; }
+function wbRels(){ return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'; }
+function collectExportRows(){
+  const rows=[];
+  WEAPONS.forEach(w=>{
+    const comp=CAT_COMP[w.cat];
+    const push=(type,cn,en,mp,dmz,id)=>{
+      const done=isDone(w.name,id);
+      const s=tierStatus(w,id);
+      const status=done?"已完成":(s.status==="available"?"可刷":("锁定："+(s.reason||"")));
+      rows.push({cat:w.cat,cnw:w.cn||"",enw:w.name,lvl:w.lvl,type,cn,en,mp,dmz,done:done?"是":"否",status});
+    };
+    push("军事","军事迷彩(满级)","Military","武器升到满级自动解锁 8 个军事迷彩","同左(满级即解锁)","M");
+    w.s.forEach((c,i)=>push("特殊",(c.cn||c.n),c.n,c.mp,c.dmz,"S"+(i+1)));
+    push("金","金 Gold","Gold",comp.gold.mp,comp.gold.dmz,"G");
+    push("铂金","铂金 Platinum","Platinum",comp.plat.mp,comp.plat.dmz,"P");
+    push("谐波破碎","谐波破碎 Harmonic Break","Harmonic Break",comp.hb.mp,comp.hb.dmz,"H");
+  });
+  MASTERY.forEach(line=>line.items.forEach(it=>{
+    const done=isDone("MASTERY",it.n);
+    rows.push({cat:"大师",cnw:"",enw:"",lvl:"",type:"大师/"+line.line,cn:it.n,en:it.n,mp:it.d,dmz:"",done:done?"是":"否",status:done?"已完成":"未完成"});
+  }));
+  return rows;
+}
+function exportXlsx(){
+  const header=["分类","武器(中文)","武器(英文)","解锁等级","迷彩类型","迷彩(中文)","迷彩(英文)","MP多人条件","DMZ僵尸条件","是否完成","状态说明"];
+  const data=[header.map(v=>({v})), ...collectExportRows().map(r=>[
+    {v:r.cat},{v:r.cnw},{v:r.enw},{v:String(r.lvl)},{v:r.type},{v:r.cn},{v:r.en},{v:r.mp},{v:r.dmz},{v:r.done},{v:r.status}
+  ])];
+  const sheet=buildSheet(data);
+  const files=[
+    {name:"[Content_Types].xml",data:cTypes()},
+    {name:"_rels/.rels",data:rootRels()},
+    {name:"xl/workbook.xml",data:workbookXml()},
+    {name:"xl/_rels/workbook.xml.rels",data:wbRels()},
+    {name:"xl/worksheets/sheet1.xml",data:sheet}
+  ];
+  const bytes=makeXlsx(files);
+  const blob=new Blob([bytes],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  const d=new Date(), pad=n=>String(n).padStart(2,"0");
+  a.download=`MW4迷彩进度-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`; a.click();
+  const el=document.getElementById("saved"); if(el){ el.textContent="✓ 已导出 Excel"; el.classList.add("show"); clearTimeout(showSaved._t); showSaved._t=setTimeout(()=>el.classList.remove("show"),2200); }
+}
+
+/* ===== AI 分析（可折叠悬浮窗） ===== */
+// ★ 站长填这里：你的 Cloudflare Worker 代理地址（部署后得到的 https://xxx.workers.dev 或自定义域名）
+//   填了之后，所有访客免 key 直接用你提供的 AI；留空则访客需自己填 key。
+const PROXY_ENDPOINT = "";
+function safeGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function refreshAIStatus(){
+  const el=document.getElementById("aistatus"); if(!el) return;
+  if(PROXY_ENDPOINT){ el.className="aistatus ok"; el.textContent="✓ 已接入站长 AI（免 key，直接点「分析我的进度」）"; }
+  else { el.className="aistatus warn"; el.textContent="⚠ 未配置共享 AI：站长需部署代理并填 PROXY_ENDPOINT；否则请自行填 key"; }
+}
+function progressSummary(){
+  const ids=[];
+  WEAPONS.forEach(w=>TIERS.forEach(t=>ids.push([w.name,t])));
+  MASTERY.forEach(l=>l.items.forEach(it=>ids.push(["MASTERY",it.n])));
+  const done=ids.filter(([w,n])=>isDone(w,n)).length, total=ids.length;
+  const L=[];
+  L.push(`总进度：${done}/${total}（${Math.round(done/total*100)}%）`);
+  L.push(`金 ${countDone("G")}/33 · 铂金 ${countDone("P")}/33 · 谐波破碎 ${countDone("H")}/33`);
+  L.push("");
+  L.push("各武器状态（✓=已完成 ○=可刷未做 🔒=前置未满足；M=军事 S1-3=特殊 G=金 P=铂金 H=谐波破碎）：");
+  WEAPONS.forEach(w=>{
+    const parts=TIERS.map(t=>{
+      const d=isDone(w.name,t); const st=tierStatus(w,t).status;
+      return t+(d?"✓":(st==="available"?"○":"🔒"));
+    });
+    L.push(`${dispName(w)} [Lv${w.lvl} ${w.cat}]: ${parts.join(" ")}`);
+  });
+  const g=[],p=[],h=[];
+  WEAPONS.forEach(w=>{
+    const G=tierStatus(w,"G"),P=tierStatus(w,"P"),Ht=tierStatus(w,"H");
+    if(!isDone(w.name,"G")&&G.status==="available")g.push(dispName(w));
+    if(!isDone(w.name,"P")&&P.status==="available")p.push(dispName(w));
+    if(!isDone(w.name,"H")&&Ht.status==="available")h.push(dispName(w));
+  });
+  L.push("");
+  L.push(`可刷「金」(${g.length}): ${g.join("、")||"—"}`);
+  L.push(`可刷「铂金」(${p.length}): ${p.join("、")||"—"}`);
+  L.push(`可刷「谐波破碎」(${h.length}): ${h.join("、")||"—"}`);
+  return L.join("\n");
+}
+function loadAISettings(){
+  document.getElementById("aiKey").value=safeGet("mw4camo_aiKey")||"";
+  document.getElementById("aiBase").value=safeGet("mw4camo_aiBase")||"https://api.deepseek.com/v1";
+  document.getElementById("aiModel").value=safeGet("mw4camo_aiModel")||"deepseek-chat";
+}
+function saveAISettings(){
+  try{
+    localStorage.setItem("mw4camo_aiKey",document.getElementById("aiKey").value.trim());
+    localStorage.setItem("mw4camo_aiBase",document.getElementById("aiBase").value.trim());
+    localStorage.setItem("mw4camo_aiModel",document.getElementById("aiModel").value.trim());
+  }catch(e){}
+  const b=document.getElementById("aiSave"), old=b.textContent; b.textContent="已保存✓";
+  setTimeout(()=>b.textContent=old,1500);
+}
+async function aiRun(){
+  const key=document.getElementById("aiKey").value.trim();
+  const base=document.getElementById("aiBase").value.trim().replace(/\/+$/,"");
+  const model=document.getElementById("aiModel").value.trim();
+  const out=document.getElementById("aiout");
+  const useOwn = !!(key && base && model);
+  const useProxy = !!PROXY_ENDPOINT && !useOwn;
+  if(!useOwn && !useProxy){
+    out.textContent = PROXY_ENDPOINT ? "正在准备…" : "未接入共享 AI，请在下方填写你自己的 API Key / 接口地址 / 模型名（填完点「保存设置」）。";
+    if(!PROXY_ENDPOINT) return;
+  }
+  out.textContent="正在分析你的进度…（若长时间无响应，多半是接口跨域或被墙）";
+  const messages=[
+    {role:"system",content:"你是《使命召唤：现代战争4》迷彩打卡教练。根据玩家进度，给出：1)当前进度点评；2)下一步最优先刷哪几把枪/哪个档位（遵循 金→铂金→谐波破碎 的前置逻辑，先集中把一类武器打满金再冲铂金）；3)针对性、可执行的建议。要求：简洁、用中文、分条列出、不要废话。"},
+    {role:"user",content:progressSummary()}
+  ];
+  try{
+    let url, headers, body;
+    if(useProxy){
+      url=PROXY_ENDPOINT; headers={"Content-Type":"application/json"};
+      body=JSON.stringify({messages,temperature:0.6});
+    } else {
+      url=base+"/chat/completions"; headers={"Content-Type":"application/json","Authorization":"Bearer "+key};
+      body=JSON.stringify({model,messages,temperature:0.6});
+    }
+    const resp=await fetch(url,{method:"POST",headers,body});
+    if(!resp.ok){ const t=await resp.text(); out.textContent="接口返回错误 "+resp.status+"：\n"+t.slice(0,400); return; }
+    const data=await resp.json();
+    const txt=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||"（接口无返回内容）";
+    out.textContent=txt;
+  }catch(e){
+    out.textContent="请求失败："+e.message+"\n\n常见原因：\n1) 接口/代理不允许跨域(CORS) 或地址填错；\n2) 网络被墙；\n3) 代理未部署或 key 未设置（站长检查 Worker 日志）。";
+  }
+}
+document.getElementById("aibtn").onclick=()=>document.getElementById("aipanel").classList.toggle("open");
+document.getElementById("aiclose").onclick=()=>document.getElementById("aipanel").classList.remove("open");
+document.getElementById("aiRun").onclick=aiRun;
+document.getElementById("aiSave").onclick=saveAISettings;
+loadAISettings();
+refreshAIStatus();
 document.getElementById("importFile").onchange=e=>{
   const f=e.target.files[0]; if(!f)return;
   const r=new FileReader(); r.onload=()=>{ try{ state=JSON.parse(r.result); saveState(); render(); alert("导入成功"); }catch(err){ alert("文件格式错误"); } };
